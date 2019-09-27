@@ -13,7 +13,7 @@ using WebCam;
 
 namespace WebCamTestApp
 {
-    public partial class FormMain : Form
+    public partial class WebCamDialog : Form
     {
         WebCam.WebCam m_webCam = new WebCam.WebCam();
         Bitmap m_bmp = null;
@@ -21,7 +21,7 @@ namespace WebCamTestApp
 
         delegate void fnHandleSnap(Bitmap bmp);
 
-        public FormMain()
+        public WebCamDialog()
         {
             InitializeComponent();
             m_webCam.OnSnapshot += m_webCam_OnSnapshot;

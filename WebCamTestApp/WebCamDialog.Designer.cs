@@ -1,6 +1,6 @@
 ﻿namespace WebCamTestApp
 {
-    partial class FormMain
+    partial class WebCamDialog
     {
         /// <summary>
         /// Required designer variable.
