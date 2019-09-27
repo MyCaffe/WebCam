@@ -199,3 +199,14 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+   == DECLARATION ==
+
+  Some parts of WebCam (DirectShow, DirectX.Capture and WebCam) are derived from the 
+  DirectXCapture open-source project, available at directxcapture.wikidot.com, which 
+  is provided "as public domain with no restrictions on use." For more details, 
+  see directxcapture.wikidot.com.
+
+  ** begin DirectXCapture License **
+  This project [DirectXCapture] is available as public domain with no restrictions on use.
+  ** end DirectXCapture License **
