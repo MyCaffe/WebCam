@@ -72,7 +72,10 @@ public class FilterCategory		// uuids.h  :  CLSID_*
 	/// <summary> CLSID_SmartTee, create a preview stream when device only provides a capture stream. </summary>
 	public static readonly Guid SmartTee = new Guid( 0xcc58e280, 0x8aa1, 0x11d1, 0xb3, 0xf1, 0x0, 0xaa, 0x0, 0x37, 0x61, 0xc5 );
 
-
+    /// <summary>
+    /// CLSID_NullRenderer, creates a null renderer.
+    /// </summary>
+    public static readonly Guid NullRenderer = new Guid( 0xC1F400A4, 0x3F08, 0x11d3, 0x9F, 0x0B, 0x00, 0x60, 0x08, 0x03, 0x9E, 0x37 );
 }
 
 

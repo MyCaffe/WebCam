@@ -39,6 +39,8 @@
             this.timerUI = new System.Windows.Forms.Timer(this.components);
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.btnStep = new System.Windows.Forms.Button();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -143,7 +145,26 @@
             this.label2.TabIndex = 8;
             this.label2.Text = "Live video:";
             // 
-            // FormMain
+            // btnStep
+            // 
+            this.btnStep.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnStep.Enabled = false;
+            this.btnStep.Location = new System.Drawing.Point(243, 841);
+            this.btnStep.Name = "btnStep";
+            this.btnStep.Size = new System.Drawing.Size(71, 23);
+            this.btnStep.TabIndex = 5;
+            this.btnStep.Text = "Step";
+            this.btnStep.UseVisualStyleBackColor = true;
+            this.btnStep.Click += new System.EventHandler(this.btnStep_Click);
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.DefaultExt = "wmv";
+            this.openFileDialog1.FileName = "openFileDialog1";
+            this.openFileDialog1.Filter = "Video Files (*.wmv)|*.wmv||";
+            this.openFileDialog1.Title = "Select a Video File";
+            // 
+            // WebCamDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -151,12 +172,13 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.listView1);
+            this.Controls.Add(this.btnStep);
             this.Controls.Add(this.btnDisconnect);
             this.Controls.Add(this.btnSnap);
             this.Controls.Add(this.btnConnect);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.pictureBox1);
-            this.Name = "FormMain";
+            this.Name = "WebCamDialog";
             this.Text = "WebCam Test Application";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
@@ -178,6 +200,8 @@
         private System.Windows.Forms.Timer timerUI;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button btnStep;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }
 }
 

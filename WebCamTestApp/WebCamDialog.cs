@@ -42,12 +42,28 @@ namespace WebCamTestApp
                 lvi.Selected = true;
 
                 listView1.Items.Add(lvi);
-            }         
+            }
+
+            listView1.Items.Add(new ListViewItem("Video File"));
         }
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
-            m_webCam.Open(listView1.SelectedItems[0].Tag as Filter, pictureBox1);
+            Filter filter = listView1.SelectedItems[0].Tag as Filter;
+
+            if (filter == null)
+            {
+                if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    m_webCam.Open(filter, pictureBox1, openFileDialog1.FileName);
+                    btnStep.Enabled = true;
+                }
+            }
+            else
+            {
+                m_webCam.Open(filter, pictureBox1, null);
+                btnStep.Enabled = false;
+            }
         }
 
         private void timerUI_Tick(object sender, EventArgs e)
@@ -72,6 +88,11 @@ namespace WebCamTestApp
         private void btnDisconnect_Click(object sender, EventArgs e)
         {
             m_webCam.Close();
+        }
+
+        private void btnStep_Click(object sender, EventArgs e)
+        {
+            m_webCam.Step(4);
         }
     }
 }
