@@ -121,20 +121,20 @@ namespace WebCam
                 m_graphBuilder.AddSourceFilterForMoniker(moniker, null, m_selectedFilter.Name, out m_camFilter);
                 Marshal.ReleaseComObject(moniker);
                 m_camControl = m_camFilter as IAMCameraControl;
+                m_captureGraphBuilder = (ICaptureGraphBuilder2)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.CaptureGraphBuilder2, true));
+
+                hr = m_captureGraphBuilder.SetFiltergraph(m_graphBuilder as IGraphBuilder);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
             }
 
             m_pb = pb;
-            m_captureGraphBuilder = (ICaptureGraphBuilder2)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.CaptureGraphBuilder2, true));
             m_sampleGrabber = (ISampleGrabber)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.SampleGrabber, true));
             m_mediaControl = m_graphBuilder as IMediaControl;
             m_videoWindow = m_graphBuilder as IVideoWindow;
             m_mediaEventEx = m_graphBuilder as IMediaEventEx;
             m_baseGrabFilter = m_sampleGrabber as IBaseFilter;
             m_videoFrameStep = m_graphBuilder as IVideoFrameStep;
-
-            hr = m_captureGraphBuilder.SetFiltergraph(m_graphBuilder as IGraphBuilder);
-            if (hr < 0)
-                Marshal.ThrowExceptionForHR(hr);
 
             hr = m_graphBuilder.AddFilter(m_baseGrabFilter, "Ds.Lib Grabber");
             if (hr < 0)
@@ -145,6 +145,18 @@ namespace WebCam
                 hr = m_graphBuilder.AddFilter(m_camFilter, m_selectedFilter.Name);
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
+
+                hr = m_sampleGrabber.SetBufferSamples(false);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                hr = m_sampleGrabber.SetOneShot(false);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                hr = m_sampleGrabber.SetCallback(this, 1);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
             }
             else
             {
@@ -152,8 +164,15 @@ namespace WebCam
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
 
-                m_camFilter = getFilter(m_graphBuilder as IGraphBuilder, "Video Renderer");
                 m_bVideoFile = true;
+
+                hr = m_sampleGrabber.SetBufferSamples(true);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                hr = m_sampleGrabber.SetOneShot(false);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
             }
 
             AMMediaType media = new AMMediaType();
@@ -161,18 +180,6 @@ namespace WebCam
             media.subType = MediaSubType.RGB24;
             media.formatType = FormatType.VideoInfo;
             hr = m_sampleGrabber.SetMediaType(media);
-            if (hr < 0)
-                Marshal.ThrowExceptionForHR(hr);
-
-            hr = m_sampleGrabber.SetBufferSamples(false);
-            if (hr < 0)
-                Marshal.ThrowExceptionForHR(hr);
-
-            hr = m_sampleGrabber.SetOneShot(false);
-            if (hr < 0)
-                Marshal.ThrowExceptionForHR(hr);
-
-            hr = m_sampleGrabber.SetCallback(this, 1);
             if (hr < 0)
                 Marshal.ThrowExceptionForHR(hr);
 
@@ -275,7 +282,12 @@ namespace WebCam
         {
             if (m_bVideoFile)
             {
-                MessageBox.Show("Not implemented yet.", "Not Implemented", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                int nSize = 0;
+                int hr = m_sampleGrabber.GetCurrentBuffer(ref nSize, IntPtr.Zero);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr); 
+
+                MessageBox.Show("Current buffer size = " + nSize.ToString("N0"), "Buffer Size", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
