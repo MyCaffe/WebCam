@@ -26,6 +26,7 @@ namespace WebCam
         IVideoWindow m_videoWindow;
         IVideoFrameStep m_videoFrameStep;
         IBaseFilter m_baseGrabFilter;
+        IBasicVideo2 m_basicVideo;
         VideoInfoHeader m_videoInfoHeader;
         Filters m_filters = new Filters();
         Filter m_selectedFilter;
@@ -34,7 +35,8 @@ namespace WebCam
         PictureBox m_pb;
         bool m_bSnapEnabled = false;
         bool m_bInvertImage = false;
-        bool m_bVideoFile = false;
+        IntPtr m_tmpBuffer = IntPtr.Zero;
+        int m_nTmpBufferSize = 0;
 
         const int WS_CHILD = 0x40000000;
         const int WS_CLIPCHILDREN = 0x02000000;
@@ -56,6 +58,13 @@ namespace WebCam
         public void Dispose()
         {
             Close();
+
+            if (m_tmpBuffer != IntPtr.Zero)
+            {
+                Marshal.FreeCoTaskMem(m_tmpBuffer);
+                m_tmpBuffer = IntPtr.Zero;
+                m_nTmpBufferSize = 0;
+            }
         }
 
         public FilterCollection VideoCompressors
@@ -114,6 +123,7 @@ namespace WebCam
 
             m_selectedFilter = filter;
             m_graphBuilder = (IFilterGraph2)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.FilterGraph, true));
+            m_captureGraphBuilder = (ICaptureGraphBuilder2)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.CaptureGraphBuilder2, true));
 
             if (strFile == null)
             {
@@ -121,7 +131,6 @@ namespace WebCam
                 m_graphBuilder.AddSourceFilterForMoniker(moniker, null, m_selectedFilter.Name, out m_camFilter);
                 Marshal.ReleaseComObject(moniker);
                 m_camControl = m_camFilter as IAMCameraControl;
-                m_captureGraphBuilder = (ICaptureGraphBuilder2)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.CaptureGraphBuilder2, true));
 
                 hr = m_captureGraphBuilder.SetFiltergraph(m_graphBuilder as IGraphBuilder);
                 if (hr < 0)
@@ -164,18 +173,10 @@ namespace WebCam
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
 
-                m_bVideoFile = true;
-
-                hr = m_sampleGrabber.SetBufferSamples(true);
-                if (hr < 0)
-                    Marshal.ThrowExceptionForHR(hr);
-
-                hr = m_sampleGrabber.SetOneShot(false);
-                if (hr < 0)
-                    Marshal.ThrowExceptionForHR(hr);
+                m_basicVideo = m_graphBuilder as IBasicVideo2;
             }
 
-            AMMediaType media = new AMMediaType();
+            AMMediaType media = new AMMediaType();            
             media.majorType = MediaType.Video;
             media.subType = MediaSubType.RGB24;
             media.formatType = FormatType.VideoInfo;
@@ -199,7 +200,7 @@ namespace WebCam
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
             }
-            
+
             media = new AMMediaType();
             hr = m_sampleGrabber.GetConnectedMediaType(media);
             if (hr < 0)
@@ -278,16 +279,64 @@ namespace WebCam
             return nVal;
         }
 
+        /// <summary>
+        /// Get a snapshot of the video or webcam.
+        /// </summary>
+        /// <remarks>
+        /// For more information on getting the snapshot from the video with the IBasicVideo interface, 
+        /// @see https://stackoverflow.com/questions/1354165/directshow-net-bitmap-shows-stripe-from-right-on-left-side-of-image
+        /// </remarks>
         public void GetImage()
         {
-            if (m_bVideoFile)
+            if (m_basicVideo != null)
             {
                 int nSize = 0;
-                int hr = m_sampleGrabber.GetCurrentBuffer(ref nSize, IntPtr.Zero);
+                int hr = m_basicVideo.GetCurrentImage(ref nSize, IntPtr.Zero);
                 if (hr < 0)
-                    Marshal.ThrowExceptionForHR(hr); 
+                    Marshal.ThrowExceptionForHR(hr);
 
-                MessageBox.Show("Current buffer size = " + nSize.ToString("N0"), "Buffer Size", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (m_tmpBuffer == IntPtr.Zero || m_nTmpBufferSize != nSize)
+                {
+                    if (m_tmpBuffer != IntPtr.Zero)
+                        Marshal.FreeCoTaskMem(m_tmpBuffer);
+
+                    m_tmpBuffer = Marshal.AllocCoTaskMem(nSize);
+                    m_nTmpBufferSize = nSize;
+                }
+
+                if (m_rgBuffer == null || m_rgBuffer.Length != nSize)
+                    m_rgBuffer = new byte[nSize];
+
+                // Get the pixel buffer of the image.
+                hr = m_basicVideo.GetCurrentImage(ref nSize, m_tmpBuffer);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                // Get the bitmap header, copy the data making sure to offset for the header size.
+                BitmapInfoHeader bmpHeader = (BitmapInfoHeader)Marshal.PtrToStructure(m_tmpBuffer, typeof(BitmapInfoHeader));
+                Marshal.Copy(m_tmpBuffer, m_rgBuffer, bmpHeader.Size, nSize - bmpHeader.Size);
+
+                // This step uses more memory but avoids the 'unsafe code' requirement in the example noted in the remarks.
+                GCHandle handle = GCHandle.Alloc(m_rgBuffer, GCHandleType.Pinned);
+                long nScan0 = handle.AddrOfPinnedObject().ToInt64();
+
+                // Change the format type.
+                PixelFormat pixelFmt = PixelFormat.Format32bppRgb;
+                int nWidth = bmpHeader.Width;
+                int nHeight = bmpHeader.Height;
+                int nBitsPerPixel = ((int)pixelFmt & 0xff00) >> 8;
+                int nBytesPerPixel = (nBitsPerPixel + 7) / 8;
+                int nStride = 4 * ((nWidth * nBytesPerPixel + 3) / 4);
+
+                // Create and rote the image.
+                Bitmap bmp = new Bitmap(nWidth, nHeight, nStride, pixelFmt, new IntPtr(nScan0));
+                bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                handle.Free();
+
+                if (m_bInvertImage)
+                    bmp = invertImage(bmp);
+
+                OnSnapshot(this, new ImageArgs(bmp, m_bInvertImage));
             }
             else
             {
