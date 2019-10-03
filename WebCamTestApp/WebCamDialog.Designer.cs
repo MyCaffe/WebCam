@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.listView1 = new System.Windows.Forms.ListView();
-            this.colCamera = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colSource = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnSnap = new System.Windows.Forms.Button();
             this.btnConnect = new System.Windows.Forms.Button();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
@@ -50,7 +50,7 @@
             this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.colCamera});
+            this.colSource});
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(12, 657);
@@ -60,10 +60,10 @@
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
             // 
-            // colCamera
+            // colSource
             // 
-            this.colCamera.Text = "Camera";
-            this.colCamera.Width = 473;
+            this.colSource.Text = "Video Source";
+            this.colSource.Width = 473;
             // 
             // btnSnap
             // 
@@ -95,6 +95,7 @@
             this.pictureBox2.Location = new System.Drawing.Point(12, 25);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(500, 303);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox2.TabIndex = 3;
             this.pictureBox2.TabStop = false;
             // 
@@ -191,7 +192,7 @@
         #endregion
 
         private System.Windows.Forms.ListView listView1;
-        private System.Windows.Forms.ColumnHeader colCamera;
+        private System.Windows.Forms.ColumnHeader colSource;
         private System.Windows.Forms.Button btnSnap;
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.PictureBox pictureBox2;
