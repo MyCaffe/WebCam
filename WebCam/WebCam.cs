@@ -262,6 +262,26 @@ namespace WebCam
             return true;
         }
 
+        public bool Play()
+        {
+            if (m_mediaControl == null)
+                return false;
+
+            m_mediaControl.Run();
+
+            return true;
+        }
+
+        public bool Stop()
+        {
+            if (m_mediaControl == null)
+                return false;
+
+            m_mediaControl.Stop();
+
+            return true;
+        }
+
         public void SetFocus(int nVal)
         {
             if (m_camControl != null)

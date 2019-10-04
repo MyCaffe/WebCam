@@ -57,12 +57,22 @@ namespace WebCamTestApp
                 {
                     m_webCam.Open(filter, pictureBox1, openFileDialog1.FileName);
                     btnStep.Enabled = true;
+                    btnPlay.Enabled = true;
+                    btnStop.Enabled = true;
+                }
+                else
+                {
+                    btnStep.Enabled = false;
+                    btnPlay.Enabled = false;
+                    btnStop.Enabled = false;
                 }
             }
             else
             {
                 m_webCam.Open(filter, pictureBox1, null);
                 btnStep.Enabled = false;
+                btnPlay.Enabled = false;
+                btnStop.Enabled = false;
             }
         }
 
@@ -74,7 +84,7 @@ namespace WebCamTestApp
                 btnConnect.Enabled = false;
 
             btnDisconnect.Enabled = m_webCam.IsConnected;
-            btnSnap.Enabled = m_webCam.IsConnected;
+            btnSnap.Enabled = m_webCam.IsConnected;            
 
             if (m_evtBmpReady.WaitOne(0))
                 pictureBox2.Image = m_bmp;
@@ -92,7 +102,17 @@ namespace WebCamTestApp
 
         private void btnStep_Click(object sender, EventArgs e)
         {
-            m_webCam.Step(4);
+            m_webCam.Step(1);
+        }
+
+        private void btnPlay_Click(object sender, EventArgs e)
+        {
+            m_webCam.Play();
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            m_webCam.Stop();
         }
     }
 }

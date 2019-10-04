@@ -41,6 +41,8 @@
             this.label2 = new System.Windows.Forms.Label();
             this.btnStep = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.btnPlay = new System.Windows.Forms.Button();
+            this.btnStop = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -164,6 +166,30 @@
             this.openFileDialog1.Filter = "Video Files (*.wmv)|*.wmv||";
             this.openFileDialog1.Title = "Select a Video File";
             // 
+            // btnPlay
+            // 
+            this.btnPlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnPlay.Enabled = false;
+            this.btnPlay.Location = new System.Drawing.Point(320, 841);
+            this.btnPlay.Name = "btnPlay";
+            this.btnPlay.Size = new System.Drawing.Size(71, 23);
+            this.btnPlay.TabIndex = 5;
+            this.btnPlay.Text = "Play";
+            this.btnPlay.UseVisualStyleBackColor = true;
+            this.btnPlay.Click += new System.EventHandler(this.btnPlay_Click);
+            // 
+            // btnStop
+            // 
+            this.btnStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnStop.Enabled = false;
+            this.btnStop.Location = new System.Drawing.Point(397, 841);
+            this.btnStop.Name = "btnStop";
+            this.btnStop.Size = new System.Drawing.Size(71, 23);
+            this.btnStop.TabIndex = 5;
+            this.btnStop.Text = "Stop";
+            this.btnStop.UseVisualStyleBackColor = true;
+            this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
+            // 
             // WebCamDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -172,6 +198,8 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.listView1);
+            this.Controls.Add(this.btnStop);
+            this.Controls.Add(this.btnPlay);
             this.Controls.Add(this.btnStep);
             this.Controls.Add(this.btnDisconnect);
             this.Controls.Add(this.btnSnap);
@@ -202,6 +230,8 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnStep;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.Button btnPlay;
+        private System.Windows.Forms.Button btnStop;
     }
 }
 
