@@ -161,7 +161,6 @@
             // openFileDialog1
             // 
             this.openFileDialog1.DefaultExt = "wmv";
-            this.openFileDialog1.FileName = "openFileDialog1";
             this.openFileDialog1.Filter = "Video Files (*.wmv)|*.wmv||";
             this.openFileDialog1.Title = "Select a Video File";
             // 
