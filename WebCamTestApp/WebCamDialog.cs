@@ -18,6 +18,7 @@ namespace WebCamTestApp
         WebCam.WebCam m_webCam = new WebCam.WebCam();
         Bitmap m_bmp = null;
         AutoResetEvent m_evtBmpReady = new AutoResetEvent(false);
+        long m_lDuration = 0;
 
         delegate void fnHandleSnap(Bitmap bmp);
 
@@ -55,16 +56,18 @@ namespace WebCamTestApp
             {
                 if (openFileDialog1.ShowDialog() == DialogResult.OK)
                 {
-                    m_webCam.Open(filter, pictureBox1, openFileDialog1.FileName);
+                    m_lDuration = m_webCam.Open(filter, pictureBox1, openFileDialog1.FileName);
                     btnStep.Enabled = true;
                     btnPlay.Enabled = true;
                     btnStop.Enabled = true;
+                    trackBar1.Enabled = true;
                 }
                 else
                 {
                     btnStep.Enabled = false;
                     btnPlay.Enabled = false;
                     btnStop.Enabled = false;
+                    trackBar1.Enabled = false;
                 }
             }
             else
@@ -73,6 +76,7 @@ namespace WebCamTestApp
                 btnStep.Enabled = false;
                 btnPlay.Enabled = false;
                 btnStop.Enabled = false;
+                trackBar1.Enabled = false;
             }
         }
 
@@ -134,6 +138,17 @@ namespace WebCamTestApp
         private void btnStop_Click(object sender, EventArgs e)
         {
             m_webCam.Stop();
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            if (m_lDuration == 0)
+                return;
+
+            double dfPct = (double)trackBar1.Value / trackBar1.Maximum;
+            long lPosition = (long)(m_lDuration * dfPct);
+
+            m_webCam.SetPosition(lPosition);
         }
     }
 }

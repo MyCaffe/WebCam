@@ -118,7 +118,7 @@ namespace WebCam
             return null;
         }
 
-        public void Open(Filter filter, PictureBox pb, string strFile)
+        public long Open(Filter filter, PictureBox pb, string strFile)
         {
             int hr;
 
@@ -253,6 +253,16 @@ namespace WebCam
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
             }
+
+            long lDuration = 0;
+            if (m_mediaSeek != null)
+            {
+                hr = m_mediaSeek.GetDuration(out lDuration);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+            }
+
+            return lDuration;
         }
 
         public bool Step(int nFrames)
@@ -330,6 +340,58 @@ namespace WebCam
             }
         }
 
+        public long Duration
+        {
+            get
+            {
+                if (m_mediaSeek == null)
+                    return 0;
+
+                long lDuration;
+                int hr = m_mediaSeek.GetDuration(out lDuration);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                return lDuration;
+            }
+        }
+
+        public long CurrentPosition
+        {
+            get
+            {
+                if (m_mediaSeek == null)
+                    return 0;
+
+                long lPosition;
+                int hr = m_mediaSeek.GetCurrentPosition(out lPosition);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                return lPosition;
+            }
+        }
+
+        public void SetPosition(long lPosition)
+        {
+            if (m_mediaSeek == null)
+                return;
+
+            long lDuration;
+            int hr = m_mediaSeek.GetDuration(out lDuration);
+            if (hr < 0)
+                Marshal.ThrowExceptionForHR(hr);
+
+            if (lPosition < 0 || lPosition > lDuration)
+                throw new Exception("The postion specified is outside of the video duration range [0," + lDuration.ToString() + "].  Please specify a valid position.");
+
+            DsOptInt64 pos = new DsOptInt64(lPosition);
+            DsOptInt64 stop = new DsOptInt64(lDuration);
+            hr = m_mediaSeek.SetPositions(pos, SeekingFlags.AbsolutePositioning, stop, SeekingFlags.AbsolutePositioning);
+            if (hr < 0)
+                Marshal.ThrowExceptionForHR(hr);
+        }
+
         public void SetFocus(int nVal)
         {
             if (m_camControl != null)
@@ -348,59 +410,70 @@ namespace WebCam
         }
 
         /// <summary>
-        /// Get a snapshot of the video or webcam.
+        /// Get a snapshot from a video file using IBasicVideo, which unfortunately is very slow.
         /// </summary>
         /// <remarks>
         /// For more information on getting the snapshot from the video with the IBasicVideo interface, 
         /// @see https://stackoverflow.com/questions/1354165/directshow-net-bitmap-shows-stripe-from-right-on-left-side-of-image
         /// </remarks>
+        /// <returns>Bitmap</returns>
+        private Bitmap getImageWithBasicVideo()
+        {
+            int nSize = 0;
+            int hr = m_basicVideo.GetCurrentImage(ref nSize, IntPtr.Zero);
+            if (hr < 0)
+                Marshal.ThrowExceptionForHR(hr);
+
+            if (m_tmpBuffer == IntPtr.Zero || m_nTmpBufferSize != nSize)
+            {
+                if (m_tmpBuffer != IntPtr.Zero)
+                    Marshal.FreeCoTaskMem(m_tmpBuffer);
+
+                m_tmpBuffer = Marshal.AllocCoTaskMem(nSize);
+                m_nTmpBufferSize = nSize;
+            }
+
+            if (m_rgBuffer == null || m_rgBuffer.Length != nSize)
+                m_rgBuffer = new byte[nSize];
+
+            // Get the pixel buffer of the image.
+            hr = m_basicVideo.GetCurrentImage(ref nSize, m_tmpBuffer);
+            if (hr < 0)
+                Marshal.ThrowExceptionForHR(hr);
+
+            // Get the bitmap header, copy the data making sure to offset for the header size.
+            BitmapInfoHeader bmpHeader = (BitmapInfoHeader)Marshal.PtrToStructure(m_tmpBuffer, typeof(BitmapInfoHeader));
+            Marshal.Copy(m_tmpBuffer, m_rgBuffer, bmpHeader.Size, nSize - bmpHeader.Size);
+
+            // This step uses more memory but avoids the 'unsafe code' requirement in the example noted in the remarks.
+            GCHandle handle = GCHandle.Alloc(m_rgBuffer, GCHandleType.Pinned);
+            long nScan0 = handle.AddrOfPinnedObject().ToInt64();
+
+            // Change the format type.
+            PixelFormat pixelFmt = PixelFormat.Format32bppRgb;
+            int nWidth = bmpHeader.Width;
+            int nHeight = bmpHeader.Height;
+            int nBitsPerPixel = ((int)pixelFmt & 0xff00) >> 8;
+            int nBytesPerPixel = (nBitsPerPixel + 7) / 8;
+            int nStride = 4 * ((nWidth * nBytesPerPixel + 3) / 4);
+
+            // Create and rote the image.
+            Bitmap bmp = new Bitmap(nWidth, nHeight, nStride, pixelFmt, new IntPtr(nScan0));
+
+            bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+            handle.Free();
+
+            return bmp;
+        }
+
+        /// <summary>
+        /// Get a snapshot of the video or webcam.
+        /// </summary>
         public void GetImage()
         {
-            if (m_basicVideo != null)
+            if (m_mediaSeek != null)
             {
-                int nSize = 0;
-                int hr = m_basicVideo.GetCurrentImage(ref nSize, IntPtr.Zero);
-                if (hr < 0)
-                    Marshal.ThrowExceptionForHR(hr);
-
-                if (m_tmpBuffer == IntPtr.Zero || m_nTmpBufferSize != nSize)
-                {
-                    if (m_tmpBuffer != IntPtr.Zero)
-                        Marshal.FreeCoTaskMem(m_tmpBuffer);
-
-                    m_tmpBuffer = Marshal.AllocCoTaskMem(nSize);
-                    m_nTmpBufferSize = nSize;
-                }
-
-                if (m_rgBuffer == null || m_rgBuffer.Length != nSize)
-                    m_rgBuffer = new byte[nSize];
-
-                // Get the pixel buffer of the image.
-                hr = m_basicVideo.GetCurrentImage(ref nSize, m_tmpBuffer);
-                if (hr < 0)
-                    Marshal.ThrowExceptionForHR(hr);
-
-                // Get the bitmap header, copy the data making sure to offset for the header size.
-                BitmapInfoHeader bmpHeader = (BitmapInfoHeader)Marshal.PtrToStructure(m_tmpBuffer, typeof(BitmapInfoHeader));
-                Marshal.Copy(m_tmpBuffer, m_rgBuffer, bmpHeader.Size, nSize - bmpHeader.Size);
-
-                // This step uses more memory but avoids the 'unsafe code' requirement in the example noted in the remarks.
-                GCHandle handle = GCHandle.Alloc(m_rgBuffer, GCHandleType.Pinned);
-                long nScan0 = handle.AddrOfPinnedObject().ToInt64();
-
-                // Change the format type.
-                PixelFormat pixelFmt = PixelFormat.Format32bppRgb;
-                int nWidth = bmpHeader.Width;
-                int nHeight = bmpHeader.Height;
-                int nBitsPerPixel = ((int)pixelFmt & 0xff00) >> 8;
-                int nBytesPerPixel = (nBitsPerPixel + 7) / 8;
-                int nStride = 4 * ((nWidth * nBytesPerPixel + 3) / 4);
-
-                // Create and rote the image.
-                Bitmap bmp = new Bitmap(nWidth, nHeight, nStride, pixelFmt, new IntPtr(nScan0));
-                bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
-                handle.Free();
-
+                Bitmap bmp = getImageWithBasicVideo();
                 if (m_bInvertImage)
                     bmp = invertImage(bmp);
 

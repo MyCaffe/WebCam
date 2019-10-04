@@ -44,8 +44,10 @@
             this.btnPlay = new System.Windows.Forms.Button();
             this.btnStop = new System.Windows.Forms.Button();
             this.lblEnd = new System.Windows.Forms.Label();
+            this.trackBar1 = new System.Windows.Forms.TrackBar();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.SuspendLayout();
             // 
             // listView1
@@ -56,7 +58,7 @@
             this.colSource});
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(12, 657);
+            this.listView1.Location = new System.Drawing.Point(12, 684);
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(500, 178);
             this.listView1.TabIndex = 7;
@@ -71,7 +73,7 @@
             // btnSnap
             // 
             this.btnSnap.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSnap.Location = new System.Drawing.Point(89, 841);
+            this.btnSnap.Location = new System.Drawing.Point(89, 868);
             this.btnSnap.Name = "btnSnap";
             this.btnSnap.Size = new System.Drawing.Size(71, 23);
             this.btnSnap.TabIndex = 5;
@@ -82,7 +84,7 @@
             // btnConnect
             // 
             this.btnConnect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnConnect.Location = new System.Drawing.Point(12, 841);
+            this.btnConnect.Location = new System.Drawing.Point(12, 868);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(71, 23);
             this.btnConnect.TabIndex = 6;
@@ -117,7 +119,7 @@
             // btnDisconnect
             // 
             this.btnDisconnect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnDisconnect.Location = new System.Drawing.Point(166, 841);
+            this.btnDisconnect.Location = new System.Drawing.Point(166, 868);
             this.btnDisconnect.Name = "btnDisconnect";
             this.btnDisconnect.Size = new System.Drawing.Size(71, 23);
             this.btnDisconnect.TabIndex = 5;
@@ -153,7 +155,7 @@
             // 
             this.btnStep.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnStep.Enabled = false;
-            this.btnStep.Location = new System.Drawing.Point(243, 841);
+            this.btnStep.Location = new System.Drawing.Point(243, 868);
             this.btnStep.Name = "btnStep";
             this.btnStep.Size = new System.Drawing.Size(65, 23);
             this.btnStep.TabIndex = 5;
@@ -171,7 +173,7 @@
             // 
             this.btnPlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnPlay.Enabled = false;
-            this.btnPlay.Location = new System.Drawing.Point(314, 841);
+            this.btnPlay.Location = new System.Drawing.Point(314, 868);
             this.btnPlay.Name = "btnPlay";
             this.btnPlay.Size = new System.Drawing.Size(65, 23);
             this.btnPlay.TabIndex = 5;
@@ -183,7 +185,7 @@
             // 
             this.btnStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnStop.Enabled = false;
-            this.btnStop.Location = new System.Drawing.Point(385, 841);
+            this.btnStop.Location = new System.Drawing.Point(385, 868);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(65, 23);
             this.btnStop.TabIndex = 5;
@@ -193,21 +195,39 @@
             // 
             // lblEnd
             // 
+            this.lblEnd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lblEnd.AutoSize = true;
             this.lblEnd.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblEnd.ForeColor = System.Drawing.Color.Red;
-            this.lblEnd.Location = new System.Drawing.Point(465, 846);
+            this.lblEnd.Location = new System.Drawing.Point(466, 872);
             this.lblEnd.Name = "lblEnd";
             this.lblEnd.Size = new System.Drawing.Size(46, 15);
             this.lblEnd.TabIndex = 9;
             this.lblEnd.Text = "AT END";
             this.lblEnd.Visible = false;
             // 
+            // trackBar1
+            // 
+            this.trackBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.trackBar1.AutoSize = false;
+            this.trackBar1.Enabled = false;
+            this.trackBar1.LargeChange = 100;
+            this.trackBar1.Location = new System.Drawing.Point(12, 657);
+            this.trackBar1.Maximum = 1000;
+            this.trackBar1.Name = "trackBar1";
+            this.trackBar1.Size = new System.Drawing.Size(500, 21);
+            this.trackBar1.SmallChange = 10;
+            this.trackBar1.TabIndex = 10;
+            this.trackBar1.TickFrequency = 10;
+            this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
+            // 
             // WebCamDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(524, 876);
+            this.ClientSize = new System.Drawing.Size(524, 903);
+            this.Controls.Add(this.trackBar1);
             this.Controls.Add(this.lblEnd);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -225,6 +245,7 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -247,6 +268,7 @@
         private System.Windows.Forms.Button btnPlay;
         private System.Windows.Forms.Button btnStop;
         private System.Windows.Forms.Label lblEnd;
+        private System.Windows.Forms.TrackBar trackBar1;
     }
 }
 
