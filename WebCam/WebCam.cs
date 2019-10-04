@@ -123,7 +123,6 @@ namespace WebCam
 
             m_selectedFilter = filter;
             m_graphBuilder = (IFilterGraph2)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.FilterGraph, true));
-            m_captureGraphBuilder = (ICaptureGraphBuilder2)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.CaptureGraphBuilder2, true));
 
             if (strFile == null)
             {
@@ -132,6 +131,7 @@ namespace WebCam
                 Marshal.ReleaseComObject(moniker);
                 m_camControl = m_camFilter as IAMCameraControl;
 
+                m_captureGraphBuilder = (ICaptureGraphBuilder2)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.CaptureGraphBuilder2, true));
                 hr = m_captureGraphBuilder.SetFiltergraph(m_graphBuilder as IGraphBuilder);
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
@@ -149,17 +149,17 @@ namespace WebCam
             if (hr < 0)
                 Marshal.ThrowExceptionForHR(hr);
 
+            hr = m_sampleGrabber.SetBufferSamples(false);
+            if (hr < 0)
+                Marshal.ThrowExceptionForHR(hr);
+
+            hr = m_sampleGrabber.SetOneShot(false);
+            if (hr < 0)
+                Marshal.ThrowExceptionForHR(hr);
+
             if (m_selectedFilter != null)
             {
                 hr = m_graphBuilder.AddFilter(m_camFilter, m_selectedFilter.Name);
-                if (hr < 0)
-                    Marshal.ThrowExceptionForHR(hr);
-
-                hr = m_sampleGrabber.SetBufferSamples(false);
-                if (hr < 0)
-                    Marshal.ThrowExceptionForHR(hr);
-
-                hr = m_sampleGrabber.SetOneShot(false);
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
 
@@ -371,6 +371,7 @@ namespace WebCam
             m_videoFrameStep = null;
             m_baseGrabFilter = null;
             m_camControl = null;
+            m_basicVideo = null;
 
             if (m_sampleGrabber != null)
             {
