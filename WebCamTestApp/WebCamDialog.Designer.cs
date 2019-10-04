@@ -43,6 +43,7 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.btnPlay = new System.Windows.Forms.Button();
             this.btnStop = new System.Windows.Forms.Button();
+            this.lblEnd = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -154,7 +155,7 @@
             this.btnStep.Enabled = false;
             this.btnStep.Location = new System.Drawing.Point(243, 841);
             this.btnStep.Name = "btnStep";
-            this.btnStep.Size = new System.Drawing.Size(71, 23);
+            this.btnStep.Size = new System.Drawing.Size(65, 23);
             this.btnStep.TabIndex = 5;
             this.btnStep.Text = "Step";
             this.btnStep.UseVisualStyleBackColor = true;
@@ -170,9 +171,9 @@
             // 
             this.btnPlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnPlay.Enabled = false;
-            this.btnPlay.Location = new System.Drawing.Point(320, 841);
+            this.btnPlay.Location = new System.Drawing.Point(314, 841);
             this.btnPlay.Name = "btnPlay";
-            this.btnPlay.Size = new System.Drawing.Size(71, 23);
+            this.btnPlay.Size = new System.Drawing.Size(65, 23);
             this.btnPlay.TabIndex = 5;
             this.btnPlay.Text = "Play";
             this.btnPlay.UseVisualStyleBackColor = true;
@@ -182,19 +183,32 @@
             // 
             this.btnStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnStop.Enabled = false;
-            this.btnStop.Location = new System.Drawing.Point(397, 841);
+            this.btnStop.Location = new System.Drawing.Point(385, 841);
             this.btnStop.Name = "btnStop";
-            this.btnStop.Size = new System.Drawing.Size(71, 23);
+            this.btnStop.Size = new System.Drawing.Size(65, 23);
             this.btnStop.TabIndex = 5;
             this.btnStop.Text = "Stop";
             this.btnStop.UseVisualStyleBackColor = true;
             this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
+            // 
+            // lblEnd
+            // 
+            this.lblEnd.AutoSize = true;
+            this.lblEnd.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblEnd.ForeColor = System.Drawing.Color.Red;
+            this.lblEnd.Location = new System.Drawing.Point(465, 846);
+            this.lblEnd.Name = "lblEnd";
+            this.lblEnd.Size = new System.Drawing.Size(46, 15);
+            this.lblEnd.TabIndex = 9;
+            this.lblEnd.Text = "AT END";
+            this.lblEnd.Visible = false;
             // 
             // WebCamDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(524, 876);
+            this.Controls.Add(this.lblEnd);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.listView1);
@@ -232,6 +246,7 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Button btnPlay;
         private System.Windows.Forms.Button btnStop;
+        private System.Windows.Forms.Label lblEnd;
     }
 }
 

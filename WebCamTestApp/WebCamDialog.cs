@@ -88,6 +88,27 @@ namespace WebCamTestApp
 
             if (m_evtBmpReady.WaitOne(0))
                 pictureBox2.Image = m_bmp;
+
+            if (m_webCam.IsAtEnd)
+            {
+                lblEnd.Visible = true;
+                lblEnd.ForeColor = Color.Red;
+                lblEnd.Text = "AT END";
+            }
+            else
+            {
+                double dfPct = m_webCam.CompletionPercent;
+                if (dfPct > 0)
+                {
+                    lblEnd.Visible = true;
+                    lblEnd.ForeColor = Color.Green;
+                    lblEnd.Text = dfPct.ToString("P");
+                }
+                else
+                {
+                    lblEnd.Visible = false;
+                }
+            }
         }
 
         private void btnSnap_Click(object sender, EventArgs e)

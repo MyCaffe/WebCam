@@ -27,6 +27,7 @@ namespace WebCam
         IVideoFrameStep m_videoFrameStep;
         IBaseFilter m_baseGrabFilter;
         IBasicVideo2 m_basicVideo;
+        IMediaSeeking m_mediaSeek;
         VideoInfoHeader m_videoInfoHeader;
         Filters m_filters = new Filters();
         Filter m_selectedFilter;
@@ -174,6 +175,7 @@ namespace WebCam
                     Marshal.ThrowExceptionForHR(hr);
 
                 m_basicVideo = m_graphBuilder as IBasicVideo2;
+                m_mediaSeek = m_graphBuilder as IMediaSeeking;
             }
 
             AMMediaType media = new AMMediaType();            
@@ -280,6 +282,52 @@ namespace WebCam
             m_mediaControl.Stop();
 
             return true;
+        }
+
+        public bool IsAtEnd
+        {
+            get
+            {
+                if (m_mediaSeek == null)
+                    return false;
+
+                long lDuration;
+                int hr = m_mediaSeek.GetDuration(out lDuration);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                long lCurrent;
+                hr = m_mediaSeek.GetCurrentPosition(out lCurrent);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                if (lCurrent == lDuration)
+                    return true;
+
+                return false;
+            }
+        }
+
+        public double CompletionPercent
+        {
+            get
+            {
+                if (m_mediaSeek == null)
+                    return 0;
+
+                long lDuration;
+                int hr = m_mediaSeek.GetDuration(out lDuration);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                long lCurrent;
+                hr = m_mediaSeek.GetCurrentPosition(out lCurrent);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                double dfPct = (lDuration == 0) ? 0 : (double)lCurrent / (double)lDuration;
+                return dfPct;
+            }
         }
 
         public void SetFocus(int nVal)
