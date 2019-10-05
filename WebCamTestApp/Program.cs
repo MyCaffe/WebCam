@@ -16,7 +16,7 @@ namespace WebCamTestApp
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new WebCamDialog());
+            Application.Run(new WebCamSample.WebCamDialog());
         }
     }
 }

@@ -11,7 +11,7 @@ using System.Windows.Forms;
 using DirectX.Capture;
 using WebCam;
 
-namespace WebCamTestApp
+namespace WebCamSample
 {
     public partial class WebCamDialog : Form
     {
@@ -60,14 +60,14 @@ namespace WebCamTestApp
                     btnStep.Enabled = true;
                     btnPlay.Enabled = true;
                     btnStop.Enabled = true;
-                    trackBar1.Enabled = true;
+                    lblEnd.Visible = true;
                 }
                 else
                 {
                     btnStep.Enabled = false;
                     btnPlay.Enabled = false;
                     btnStop.Enabled = false;
-                    trackBar1.Enabled = false;
+                    lblEnd.Visible = false;
                 }
             }
             else
@@ -76,7 +76,7 @@ namespace WebCamTestApp
                 btnStep.Enabled = false;
                 btnPlay.Enabled = false;
                 btnStop.Enabled = false;
-                trackBar1.Enabled = false;
+                lblEnd.Visible = false;
             }
         }
 
@@ -88,7 +88,7 @@ namespace WebCamTestApp
                 btnConnect.Enabled = false;
 
             btnDisconnect.Enabled = m_webCam.IsConnected;
-            btnSnap.Enabled = m_webCam.IsConnected;            
+            btnSnap.Enabled = m_webCam.IsConnected;
 
             if (m_evtBmpReady.WaitOne(0))
                 pictureBox2.Image = m_bmp;
@@ -138,17 +138,6 @@ namespace WebCamTestApp
         private void btnStop_Click(object sender, EventArgs e)
         {
             m_webCam.Stop();
-        }
-
-        private void trackBar1_Scroll(object sender, EventArgs e)
-        {
-            if (m_lDuration == 0)
-                return;
-
-            double dfPct = (double)trackBar1.Value / trackBar1.Maximum;
-            long lPosition = (long)(m_lDuration * dfPct);
-
-            m_webCam.SetPosition(lPosition);
         }
     }
 }

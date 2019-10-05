@@ -17,16 +17,16 @@ namespace WebCam
     public class WebCam : ISampleGrabberCB, IDisposable
     {
         IBaseFilter m_camFilter;
+        IBaseFilter m_videoFilter;
         IFilterGraph2 m_graphBuilder;
         IAMCameraControl m_camControl;
-        ICaptureGraphBuilder2 m_captureGraphBuilder;
+        ICaptureGraphBuilder2 m_captureGraphBuilder;      
         ISampleGrabber m_sampleGrabber;
         IMediaControl m_mediaControl;
         IMediaEventEx m_mediaEventEx;
         IVideoWindow m_videoWindow;
         IVideoFrameStep m_videoFrameStep;
         IBaseFilter m_baseGrabFilter;
-        IBasicVideo2 m_basicVideo;
         IMediaSeeking m_mediaSeek;
         VideoInfoHeader m_videoInfoHeader;
         Filters m_filters = new Filters();
@@ -38,6 +38,7 @@ namespace WebCam
         bool m_bInvertImage = false;
         IntPtr m_tmpBuffer = IntPtr.Zero;
         int m_nTmpBufferSize = 0;
+        bool m_bRunning = false;
 
         const int WS_CHILD = 0x40000000;
         const int WS_CLIPCHILDREN = 0x02000000;
@@ -89,7 +90,7 @@ namespace WebCam
             }
         }
 
-        private IBaseFilter getFilter(IGraphBuilder ibuilder, string strName)
+        private IBaseFilter getFilter(IGraphBuilder ibuilder, string strName, bool bExact = true)
         {
             IEnumFilters ienum;
             int hr = ibuilder.EnumFilters(out ienum);
@@ -107,11 +108,13 @@ namespace WebCam
 
                 Trace.WriteLine(fi.achName);
 
-                if (fi.achName == strName)
+                if ((bExact && fi.achName == strName) || (!bExact && fi.achName.Contains(strName)))
                 {
                     Marshal.ReleaseComObject(ienum);
                     return ifilter;
                 }
+
+                Marshal.ReleaseComObject(ifilter);
             }
 
             Marshal.ReleaseComObject(ienum);
@@ -141,10 +144,25 @@ namespace WebCam
             m_pb = pb;
             m_sampleGrabber = (ISampleGrabber)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.SampleGrabber, true));
             m_mediaControl = m_graphBuilder as IMediaControl;
-            m_videoWindow = m_graphBuilder as IVideoWindow;
             m_mediaEventEx = m_graphBuilder as IMediaEventEx;
+            m_videoWindow = m_graphBuilder as IVideoWindow;
             m_baseGrabFilter = m_sampleGrabber as IBaseFilter;
-            m_videoFrameStep = m_graphBuilder as IVideoFrameStep;
+
+            if (m_selectedFilter != null)
+            {
+                hr = m_graphBuilder.AddFilter(m_camFilter, m_selectedFilter.Name);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+            }
+            else
+            {
+                hr = m_graphBuilder.RenderFile(strFile, null);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                m_mediaSeek = m_graphBuilder as IMediaSeeking;
+                m_videoFrameStep = m_graphBuilder as IVideoFrameStep;
+            }
 
             hr = m_graphBuilder.AddFilter(m_baseGrabFilter, "Ds.Lib Grabber");
             if (hr < 0)
@@ -158,27 +176,11 @@ namespace WebCam
             if (hr < 0)
                 Marshal.ThrowExceptionForHR(hr);
 
-            if (m_selectedFilter != null)
-            {
-                hr = m_graphBuilder.AddFilter(m_camFilter, m_selectedFilter.Name);
-                if (hr < 0)
-                    Marshal.ThrowExceptionForHR(hr);
+            hr = m_sampleGrabber.SetCallback(this, 1);
+            if (hr < 0)
+                Marshal.ThrowExceptionForHR(hr);
 
-                hr = m_sampleGrabber.SetCallback(this, 1);
-                if (hr < 0)
-                    Marshal.ThrowExceptionForHR(hr);
-            }
-            else
-            {
-                hr = m_graphBuilder.RenderFile(strFile, strFile);
-                if (hr < 0)
-                    Marshal.ThrowExceptionForHR(hr);
-
-                m_basicVideo = m_graphBuilder as IBasicVideo2;
-                m_mediaSeek = m_graphBuilder as IMediaSeeking;
-            }
-
-            AMMediaType media = new AMMediaType();            
+            AMMediaType media = new AMMediaType();
             media.majorType = MediaType.Video;
             media.subType = MediaSubType.RGB24;
             media.formatType = FormatType.VideoInfo;
@@ -186,10 +188,12 @@ namespace WebCam
             if (hr < 0)
                 Marshal.ThrowExceptionForHR(hr);
 
-            Guid cat;
-            Guid med;
+            // Connect the WebCam Filters and Frame Grabber.
             if (m_selectedFilter != null)
             {
+                Guid cat;
+                Guid med;
+
                 cat = PinCategory.Preview;
                 med = MediaType.Video;
                 hr = m_captureGraphBuilder.RenderStream(ref cat, ref med, m_camFilter, null, null);
@@ -201,6 +205,81 @@ namespace WebCam
                 hr = m_captureGraphBuilder.RenderStream(ref cat, ref med, m_camFilter, null, m_baseGrabFilter);
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
+            }
+            else
+            {
+                IBaseFilter soundFilter = getFilter(m_graphBuilder as IGraphBuilder, "Audio Decoder", false);
+                if (soundFilter != null)
+                {
+                    hr = m_graphBuilder.RemoveFilter(soundFilter);
+                    if (hr < 0)
+                        Marshal.ThrowExceptionForHR(hr);
+
+                    Marshal.ReleaseComObject(soundFilter);
+                }
+
+                soundFilter = getFilter(m_graphBuilder as IGraphBuilder, "Sound", false);
+                if (soundFilter != null)
+                {
+                    hr = m_graphBuilder.RemoveFilter(soundFilter);
+                    if (hr < 0)
+                        Marshal.ThrowExceptionForHR(hr);
+
+                    Marshal.ReleaseComObject(soundFilter);
+                }
+
+                m_videoFilter = getFilter(m_graphBuilder as IGraphBuilder, "Video Decoder", false);
+
+                getFilter(m_graphBuilder as IGraphBuilder, null);
+
+                IPin pOutput;
+                hr = Utility.GetPin(m_videoFilter, PinDirection.Output, out pOutput);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                IPin pInput;
+                hr = pOutput.ConnectedTo(out pInput);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                PinInfo pinInfo;
+                hr = pInput.QueryPinInfo(out pinInfo);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                IPin pGrabInput;
+                hr = Utility.GetPin(m_baseGrabFilter, PinDirection.Input, out pGrabInput);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                IPin pGrabOutput;
+                hr = Utility.GetPin(m_baseGrabFilter, PinDirection.Output, out pGrabOutput);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                // Disconnect the source filter output and the input it is connected to.
+                hr = pOutput.Disconnect();
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                hr = pInput.Disconnect();
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                // Connect the source output to the Grabber input.
+                hr = m_graphBuilder.Connect(pOutput, pGrabInput);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                // Connect the Grabber output to the original downstream input that the source was connected to.
+                hr = m_graphBuilder.Connect(pGrabOutput, pInput);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                Marshal.ReleaseComObject(pOutput);
+                Marshal.ReleaseComObject(pInput);
+                Marshal.ReleaseComObject(pGrabInput);
+                Marshal.ReleaseComObject(pGrabOutput);
             }
 
             media = new AMMediaType();
@@ -219,30 +298,30 @@ namespace WebCam
             media.formatPtr = IntPtr.Zero;
 
 
-            // setup the video window
+            if (m_videoWindow != null)
+            {
+                // setup the video window
+                hr = m_videoWindow.put_Owner(pb.Handle);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
 
-            hr = m_videoWindow.put_Owner(pb.Handle);
-            if (hr < 0)
-                Marshal.ThrowExceptionForHR(hr);
-
-            hr = m_videoWindow.put_WindowStyle(WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-            if (hr < 0)
-                Marshal.ThrowExceptionForHR(hr);
+                hr = m_videoWindow.put_WindowStyle(WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
 
 
-            // resize the window
+                // resize the window
+                hr = m_videoWindow.SetWindowPosition(0, 0, pb.Width, pb.Height);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
 
-            hr = m_videoWindow.SetWindowPosition(0, 0, pb.Width, pb.Height);
-            if (hr < 0)
-                Marshal.ThrowExceptionForHR(hr);
-
-            hr = m_videoWindow.put_Visible(DsHlp.OATRUE);
-            if (hr < 0)
-                Marshal.ThrowExceptionForHR(hr);
+                hr = m_videoWindow.put_Visible(DsHlp.OATRUE);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+            }
 
 
             // start the capturing
-
             hr = m_mediaControl.Run();
             if (hr < 0)
                 Marshal.ThrowExceptionForHR(hr);
@@ -265,12 +344,70 @@ namespace WebCam
             return lDuration;
         }
 
+        public void Close()
+        {
+            if (m_mediaControl != null)
+                m_mediaControl.StopWhenReady();
+
+            if (m_mediaEventEx != null)
+                m_mediaEventEx.SetNotifyWindow(IntPtr.Zero, WM_GRAPHNOTIFY, IntPtr.Zero);
+
+            if (m_videoWindow != null)
+            {
+                m_videoWindow.put_Visible(DsHlp.OAFALSE);
+                m_videoWindow.put_Owner(IntPtr.Zero);
+            }
+
+            m_mediaControl = null;
+            m_mediaEventEx = null;
+            m_videoWindow = null;
+            m_videoFrameStep = null;
+            m_baseGrabFilter = null;
+            m_camControl = null;
+
+            if (m_sampleGrabber != null)
+            {
+                Marshal.ReleaseComObject(m_sampleGrabber);
+                m_sampleGrabber = null;
+            }
+
+            if (m_captureGraphBuilder != null)
+            {
+                Marshal.ReleaseComObject(m_captureGraphBuilder);
+                m_captureGraphBuilder = null;
+            }
+
+            if (m_graphBuilder != null)
+            {
+                Marshal.ReleaseComObject(m_graphBuilder);
+                m_graphBuilder = null;
+            }
+
+            if (m_camFilter != null)
+            {
+                Marshal.ReleaseComObject(m_camFilter);
+                m_camFilter = null;
+            }
+
+            if (m_videoFilter != null)
+            {
+                Marshal.ReleaseComObject(m_videoFilter);
+                m_videoFilter = null;
+            }
+        }
+
         public bool Step(int nFrames)
         {
             if (m_videoFrameStep == null)
                 return false;
 
-            m_videoFrameStep.Step(nFrames, null);
+            if (m_bRunning)
+                return false;
+
+            int hr = m_videoFrameStep.Step(nFrames, null);
+            if (hr < 0)
+                Marshal.ThrowExceptionForHR(hr);
+
             return true;
         }
 
@@ -279,7 +416,11 @@ namespace WebCam
             if (m_mediaControl == null)
                 return false;
 
-            m_mediaControl.Run();
+            int hr = m_mediaControl.Run();
+            if (hr < 0)
+                Marshal.ThrowExceptionForHR(hr);
+
+            m_bRunning = true;
 
             return true;
         }
@@ -289,7 +430,11 @@ namespace WebCam
             if (m_mediaControl == null)
                 return false;
 
-            m_mediaControl.Stop();
+            int hr = m_mediaControl.Stop();
+            if (hr < 0)
+                Marshal.ThrowExceptionForHR(hr);
+
+            m_bRunning = false;
 
             return true;
         }
@@ -409,18 +554,67 @@ namespace WebCam
             return nVal;
         }
 
-        /// <summary>
-        /// Get a snapshot from a video file using IBasicVideo, which unfortunately is very slow.
-        /// </summary>
-        /// <remarks>
-        /// For more information on getting the snapshot from the video with the IBasicVideo interface, 
-        /// @see https://stackoverflow.com/questions/1354165/directshow-net-bitmap-shows-stripe-from-right-on-left-side-of-image
-        /// </remarks>
-        /// <returns>Bitmap</returns>
-        private Bitmap getImageWithBasicVideo()
+        ///// <summary>
+        ///// Get a snapshot from a video file using IBasicVideo, which unfortunately is very slow and appears to require a message pump.
+        ///// </summary>
+        ///// <remarks>
+        ///// For more information on getting the snapshot from the video with the IBasicVideo interface, 
+        ///// @see https://stackoverflow.com/questions/1354165/directshow-net-bitmap-shows-stripe-from-right-on-left-side-of-image
+        ///// </remarks>
+        ///// <returns>Bitmap</returns>
+        //private Bitmap getImageWithBasicVideo()
+        //{
+        //    int nSize = 0;
+        //    int hr = m_basicVideo.GetCurrentImage(ref nSize, IntPtr.Zero);
+        //    if (hr < 0)
+        //        Marshal.ThrowExceptionForHR(hr);
+
+        //    if (m_tmpBuffer == IntPtr.Zero || m_nTmpBufferSize != nSize)
+        //    {
+        //        if (m_tmpBuffer != IntPtr.Zero)
+        //            Marshal.FreeCoTaskMem(m_tmpBuffer);
+
+        //        m_tmpBuffer = Marshal.AllocCoTaskMem(nSize);
+        //        m_nTmpBufferSize = nSize;
+        //    }
+
+        //    if (m_rgBuffer == null || m_rgBuffer.Length != nSize)
+        //        m_rgBuffer = new byte[nSize];
+
+        //    // Get the pixel buffer of the image.
+        //    hr = m_basicVideo.GetCurrentImage(ref nSize, m_tmpBuffer);
+        //    if (hr < 0)
+        //        Marshal.ThrowExceptionForHR(hr);
+
+        //    // Get the bitmap header, copy the data making sure to offset for the header size.
+        //    BitmapInfoHeader bmpHeader = (BitmapInfoHeader)Marshal.PtrToStructure(m_tmpBuffer, typeof(BitmapInfoHeader));
+        //    Marshal.Copy(m_tmpBuffer, m_rgBuffer, bmpHeader.Size, nSize - bmpHeader.Size);
+
+        //    // This step uses more memory but avoids the 'unsafe code' requirement in the example noted in the remarks.
+        //    GCHandle handle = GCHandle.Alloc(m_rgBuffer, GCHandleType.Pinned);
+        //    long nScan0 = handle.AddrOfPinnedObject().ToInt64();
+
+        //    // Change the format type.
+        //    PixelFormat pixelFmt = PixelFormat.Format32bppRgb;
+        //    int nWidth = bmpHeader.Width;
+        //    int nHeight = bmpHeader.Height;
+        //    int nBitsPerPixel = ((int)pixelFmt & 0xff00) >> 8;
+        //    int nBytesPerPixel = (nBitsPerPixel + 7) / 8;
+        //    int nStride = 4 * ((nWidth * nBytesPerPixel + 3) / 4);
+
+        //    // Create and rote the image.
+        //    Bitmap bmp = new Bitmap(nWidth, nHeight, nStride, pixelFmt, new IntPtr(nScan0));
+
+        //    bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+        //    handle.Free();
+
+        //    return bmp;
+        //}
+
+        private Bitmap getImageWithSampleGrabber()
         {
             int nSize = 0;
-            int hr = m_basicVideo.GetCurrentImage(ref nSize, IntPtr.Zero);
+            int hr = m_sampleGrabber.GetCurrentBuffer(ref m_nTmpBufferSize, IntPtr.Zero);
             if (hr < 0)
                 Marshal.ThrowExceptionForHR(hr);
 
@@ -437,7 +631,7 @@ namespace WebCam
                 m_rgBuffer = new byte[nSize];
 
             // Get the pixel buffer of the image.
-            hr = m_basicVideo.GetCurrentImage(ref nSize, m_tmpBuffer);
+            hr = m_sampleGrabber.GetCurrentBuffer(ref m_nTmpBufferSize, m_tmpBuffer);
             if (hr < 0)
                 Marshal.ThrowExceptionForHR(hr);
 
@@ -471,72 +665,15 @@ namespace WebCam
         /// </summary>
         public void GetImage()
         {
-            if (m_mediaSeek != null)
-            {
-                Bitmap bmp = getImageWithBasicVideo();
-                if (m_bInvertImage)
-                    bmp = invertImage(bmp);
+            int nSize = m_videoInfoHeader.BmiHeader.ImageSize;
+            if (m_rgBuffer == null || m_rgBuffer.Length != nSize + 63999)
+                m_rgBuffer = new byte[nSize + 63999];
 
-                OnSnapshot(this, new ImageArgs(bmp, m_bInvertImage));
-            }
-            else
-            {
-                int nSize = m_videoInfoHeader.BmiHeader.ImageSize;
-                if (m_rgBuffer == null || m_rgBuffer.Length != nSize + 63999)
-                    m_rgBuffer = new byte[nSize + 63999];
-
-                m_bSnapEnabled = true;
-                m_evtImageSnapped.WaitOne();
-            }
+            m_bSnapEnabled = true;
+            Step(1);
+            m_evtImageSnapped.WaitOne();
 
             return;
-        }
-
-        public void Close()
-        {
-            if (m_mediaControl != null)
-                m_mediaControl.StopWhenReady();
-
-            if (m_mediaEventEx != null)
-                m_mediaEventEx.SetNotifyWindow(IntPtr.Zero, WM_GRAPHNOTIFY, IntPtr.Zero);
-
-            if (m_videoWindow != null)
-            {
-                m_videoWindow.put_Visible(DsHlp.OAFALSE);
-                m_videoWindow.put_Owner(IntPtr.Zero);
-            }
-
-            m_mediaControl = null;
-            m_mediaEventEx = null;
-            m_videoWindow = null;
-            m_videoFrameStep = null;
-            m_baseGrabFilter = null;
-            m_camControl = null;
-            m_basicVideo = null;
-
-            if (m_sampleGrabber != null)
-            {
-                Marshal.ReleaseComObject(m_sampleGrabber);
-                m_sampleGrabber = null;
-            }
-
-            if (m_captureGraphBuilder != null)
-            {
-                Marshal.ReleaseComObject(m_captureGraphBuilder);
-                m_captureGraphBuilder = null;
-            }
-
-            if (m_graphBuilder != null)
-            {
-                Marshal.ReleaseComObject(m_graphBuilder);
-                m_graphBuilder = null;
-            }
-
-            if (m_camFilter != null)
-            {
-                Marshal.ReleaseComObject(m_camFilter);
-                m_camFilter = null;
-            }
         }
 
         public int SampleCB(double SampleTime, IMediaSample pSample)
@@ -563,6 +700,7 @@ namespace WebCam
                 nScan0 += (nHt - 1) * nStride;
 
                 Bitmap bmp = new Bitmap(nWid, nHt, -nStride, System.Drawing.Imaging.PixelFormat.Format24bppRgb, new IntPtr(nScan0));
+
                 handle.Free();
 
                 if (m_bInvertImage)

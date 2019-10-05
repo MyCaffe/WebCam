@@ -168,5 +168,43 @@ namespace WebCam
 
             return hr;
         }
+
+        public static int GetPin(IBaseFilter pFilter, PinDirection dir, out IPin pin, string strName = null)
+        {
+            uint VFW_E_NOT_FOUND = 0x80040216;
+            IEnumPins iEnum = null;
+
+            pin = null;
+
+            int hr = pFilter.EnumPins(out iEnum);
+            if (hr < 0)
+                Marshal.ThrowExceptionForHR(hr);
+
+            IPin[] rgPin = new IPin[1];
+            int nFetched;
+
+            while (iEnum.Next(1, rgPin, out nFetched) == 0)
+            {
+                PinInfo pinInfo;
+                hr = rgPin[0].QueryPinInfo(out pinInfo);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                if (pinInfo.dir == dir && (strName == null || pinInfo.name.Contains(strName)))
+                {
+                    pin = rgPin[0];
+                    break;
+                }
+
+                Marshal.ReleaseComObject(rgPin[0]);
+            }
+
+            Marshal.ReleaseComObject(iEnum);
+
+            if (pin == null)
+                return (int)VFW_E_NOT_FOUND;
+
+            return 0;
+        }
     }
 }

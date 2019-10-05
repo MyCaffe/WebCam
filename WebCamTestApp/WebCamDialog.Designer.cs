@@ -1,4 +1,4 @@
-﻿namespace WebCamTestApp
+﻿namespace WebCamSample
 {
     partial class WebCamDialog
     {
@@ -38,16 +38,14 @@
             this.btnDisconnect = new System.Windows.Forms.Button();
             this.timerUI = new System.Windows.Forms.Timer(this.components);
             this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
             this.btnStep = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.btnPlay = new System.Windows.Forms.Button();
             this.btnStop = new System.Windows.Forms.Button();
             this.lblEnd = new System.Windows.Forms.Label();
-            this.trackBar1 = new System.Windows.Forms.TrackBar();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
             this.SuspendLayout();
             // 
             // listView1
@@ -58,9 +56,9 @@
             this.colSource});
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(12, 684);
+            this.listView1.Location = new System.Drawing.Point(12, 659);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(500, 178);
+            this.listView1.Size = new System.Drawing.Size(500, 113);
             this.listView1.TabIndex = 7;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -73,7 +71,7 @@
             // btnSnap
             // 
             this.btnSnap.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSnap.Location = new System.Drawing.Point(89, 868);
+            this.btnSnap.Location = new System.Drawing.Point(89, 778);
             this.btnSnap.Name = "btnSnap";
             this.btnSnap.Size = new System.Drawing.Size(71, 23);
             this.btnSnap.TabIndex = 5;
@@ -84,7 +82,7 @@
             // btnConnect
             // 
             this.btnConnect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnConnect.Location = new System.Drawing.Point(12, 868);
+            this.btnConnect.Location = new System.Drawing.Point(12, 778);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(71, 23);
             this.btnConnect.TabIndex = 6;
@@ -106,11 +104,10 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBox1.Location = new System.Drawing.Point(12, 348);
+            this.pictureBox1.Location = new System.Drawing.Point(12, 347);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(500, 303);
             this.pictureBox1.TabIndex = 4;
@@ -119,7 +116,7 @@
             // btnDisconnect
             // 
             this.btnDisconnect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnDisconnect.Location = new System.Drawing.Point(166, 868);
+            this.btnDisconnect.Location = new System.Drawing.Point(166, 778);
             this.btnDisconnect.Name = "btnDisconnect";
             this.btnDisconnect.Size = new System.Drawing.Size(71, 23);
             this.btnDisconnect.TabIndex = 5;
@@ -142,20 +139,11 @@
             this.label1.TabIndex = 8;
             this.label1.Text = "Snapshot:";
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 332);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(59, 13);
-            this.label2.TabIndex = 8;
-            this.label2.Text = "Live video:";
-            // 
             // btnStep
             // 
             this.btnStep.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnStep.Enabled = false;
-            this.btnStep.Location = new System.Drawing.Point(243, 868);
+            this.btnStep.Location = new System.Drawing.Point(243, 778);
             this.btnStep.Name = "btnStep";
             this.btnStep.Size = new System.Drawing.Size(65, 23);
             this.btnStep.TabIndex = 5;
@@ -173,7 +161,7 @@
             // 
             this.btnPlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnPlay.Enabled = false;
-            this.btnPlay.Location = new System.Drawing.Point(314, 868);
+            this.btnPlay.Location = new System.Drawing.Point(314, 778);
             this.btnPlay.Name = "btnPlay";
             this.btnPlay.Size = new System.Drawing.Size(65, 23);
             this.btnPlay.TabIndex = 5;
@@ -185,7 +173,7 @@
             // 
             this.btnStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnStop.Enabled = false;
-            this.btnStop.Location = new System.Drawing.Point(385, 868);
+            this.btnStop.Location = new System.Drawing.Point(385, 778);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(65, 23);
             this.btnStop.TabIndex = 5;
@@ -199,35 +187,27 @@
             this.lblEnd.AutoSize = true;
             this.lblEnd.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblEnd.ForeColor = System.Drawing.Color.Red;
-            this.lblEnd.Location = new System.Drawing.Point(466, 872);
+            this.lblEnd.Location = new System.Drawing.Point(466, 782);
             this.lblEnd.Name = "lblEnd";
             this.lblEnd.Size = new System.Drawing.Size(46, 15);
             this.lblEnd.TabIndex = 9;
             this.lblEnd.Text = "AT END";
             this.lblEnd.Visible = false;
             // 
-            // trackBar1
+            // label2
             // 
-            this.trackBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.trackBar1.AutoSize = false;
-            this.trackBar1.Enabled = false;
-            this.trackBar1.LargeChange = 100;
-            this.trackBar1.Location = new System.Drawing.Point(12, 657);
-            this.trackBar1.Maximum = 1000;
-            this.trackBar1.Name = "trackBar1";
-            this.trackBar1.Size = new System.Drawing.Size(500, 21);
-            this.trackBar1.SmallChange = 10;
-            this.trackBar1.TabIndex = 10;
-            this.trackBar1.TickFrequency = 10;
-            this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 331);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(30, 13);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "Live:";
             // 
             // WebCamDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(524, 903);
-            this.Controls.Add(this.trackBar1);
+            this.ClientSize = new System.Drawing.Size(524, 813);
             this.Controls.Add(this.lblEnd);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -245,7 +225,6 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -262,13 +241,12 @@
         private System.Windows.Forms.Button btnDisconnect;
         private System.Windows.Forms.Timer timerUI;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnStep;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Button btnPlay;
         private System.Windows.Forms.Button btnStop;
         private System.Windows.Forms.Label lblEnd;
-        private System.Windows.Forms.TrackBar trackBar1;
+        private System.Windows.Forms.Label label2;
     }
 }
 
