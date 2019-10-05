@@ -19,8 +19,23 @@ namespace WebCamSample
         Bitmap m_bmp = null;
         AutoResetEvent m_evtBmpReady = new AutoResetEvent(false);
         long m_lDuration = 0;
+        COMMAND m_cmd;
+        ManualResetEvent m_evtCancel = new ManualResetEvent(false);
+        AutoResetEvent m_evtCmdReady = new AutoResetEvent(false);
+        AutoResetEvent m_evtCmdDone = new AutoResetEvent(false);
+        Task m_taskCmd = null;
+        AutoResetEvent m_evtCreateDone = new AutoResetEvent(false);
+        Task m_taskCreate = null;
 
         delegate void fnHandleSnap(Bitmap bmp);
+
+        public enum COMMAND
+        {
+            SNAP,
+            STEP,
+            PLAY,
+            STOP
+        }
 
         public WebCamDialog()
         {
@@ -51,33 +66,40 @@ namespace WebCamSample
         private void btnConnect_Click(object sender, EventArgs e)
         {
             Filter filter = listView1.SelectedItems[0].Tag as Filter;
+            string strFile = null;
+
+            btnStep.Enabled = false;
+            btnPlay.Enabled = false;
+            btnStop.Enabled = false;
+            lblEnd.Visible = false;
 
             if (filter == null)
             {
-                if (openFileDialog1.ShowDialog() == DialogResult.OK)
-                {
-                    m_lDuration = m_webCam.Open(filter, pictureBox1, openFileDialog1.FileName);
-                    btnStep.Enabled = true;
-                    btnPlay.Enabled = true;
-                    btnStop.Enabled = true;
-                    lblEnd.Visible = true;
-                }
-                else
-                {
-                    btnStep.Enabled = false;
-                    btnPlay.Enabled = false;
-                    btnStop.Enabled = false;
-                    lblEnd.Visible = false;
-                }
+                if (openFileDialog1.ShowDialog() != DialogResult.OK)
+                    return;
+
+                btnStep.Enabled = true;
+                btnPlay.Enabled = true;
+                btnStop.Enabled = true;
+                lblEnd.Visible = true;
+
+                strFile = openFileDialog1.FileName;
             }
-            else
+
+            m_evtCancel.Reset();
+            bool bCreated = false;
+
+            if (chkCreateOnSeparateThread.Checked)
             {
-                m_webCam.Open(filter, pictureBox1, null);
-                btnStep.Enabled = false;
-                btnPlay.Enabled = false;
-                btnStop.Enabled = false;
-                lblEnd.Visible = false;
+                m_taskCreate = Task.Factory.StartNew(new Action<object>(createThread), new Tuple<Filter, string>(filter, strFile));
+                bCreated = true;
             }
+
+            if (chkRunOnSeparateThread.Checked)
+                m_taskCmd = Task.Factory.StartNew(new Action(testThread));
+
+            if (!bCreated)
+                m_webCam.Open(filter, pictureBox1, strFile);
         }
 
         private void timerUI_Tick(object sender, EventArgs e)
@@ -115,29 +137,127 @@ namespace WebCamSample
             }
         }
 
-        private void btnSnap_Click(object sender, EventArgs e)
-        {
-            m_webCam.GetImage();
-        }
-
         private void btnDisconnect_Click(object sender, EventArgs e)
         {
-            m_webCam.Close();
+            bool bClosed = false;
+
+            if (m_taskCmd != null || m_taskCreate != null)
+            {
+                m_evtCancel.Set();
+
+                if (m_taskCmd != null)
+                {
+                    m_taskCmd.Wait();
+                    m_taskCmd.Dispose();
+                    m_taskCmd = null;
+                }
+
+                if (m_taskCreate != null)
+                {
+                    m_taskCreate.Wait();
+                    m_taskCreate.Dispose();
+                    m_taskCreate = null;
+                    bClosed = true;
+                }
+            }
+
+            if (!bClosed)
+                m_webCam.Close();
+        }
+
+        private void btnSnap_Click(object sender, EventArgs e)
+        {
+            if (m_taskCmd != null)
+            {
+                m_cmd = COMMAND.SNAP;
+                m_evtCmdReady.Set();
+                m_evtCmdDone.WaitOne();
+                return;
+            }
+
+            m_webCam.GetImage();
         }
 
         private void btnStep_Click(object sender, EventArgs e)
         {
+            if (m_taskCmd != null)
+            {
+                m_cmd = COMMAND.STEP;
+                m_evtCmdReady.Set();
+                m_evtCmdDone.WaitOne();
+                return;
+            }
+
             m_webCam.Step(1);
         }
 
         private void btnPlay_Click(object sender, EventArgs e)
         {
+            if (m_taskCmd != null)
+            {
+                m_cmd = COMMAND.PLAY;
+                m_evtCmdReady.Set();
+                m_evtCmdDone.WaitOne();
+                return;
+            }
+
             m_webCam.Play();
         }
 
         private void btnStop_Click(object sender, EventArgs e)
         {
+            if (m_taskCmd != null)
+            {
+                m_cmd = COMMAND.STOP;
+                m_evtCmdReady.Set();
+                m_evtCmdDone.WaitOne();
+                return;
+            }
+
             m_webCam.Stop();
+        }
+
+        private void createThread(object obj)
+        {
+            Tuple<Filter, string> args = obj as Tuple<Filter, string>;
+
+            m_webCam = new WebCam.WebCam();
+            m_webCam.OnSnapshot += m_webCam_OnSnapshot;
+            m_webCam.Open(args.Item1, null, args.Item2);
+            m_evtCreateDone.Set();
+
+            m_evtCancel.WaitOne();
+            m_webCam.Close();
+        }
+
+        private void testThread()
+        {
+            while (!m_evtCancel.WaitOne(0))
+            {
+                if (m_evtCmdReady.WaitOne(100))
+                {
+                    switch (m_cmd)
+                    {
+                        case COMMAND.SNAP:
+                            m_webCam.GetImage();
+                            break;
+
+                        case COMMAND.STEP:
+                            m_webCam.Step(1);
+                            break;
+
+                        case COMMAND.PLAY:
+                            m_webCam.Play();
+                            break;
+
+                        case COMMAND.STOP:
+                            m_webCam.Stop();
+                            break;
+                    }
+
+                    m_evtCmdDone.Set();
+                }
+            }
         }
     }
 }

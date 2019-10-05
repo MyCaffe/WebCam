@@ -44,6 +44,8 @@
             this.btnStop = new System.Windows.Forms.Button();
             this.lblEnd = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.chkRunOnSeparateThread = new System.Windows.Forms.CheckBox();
+            this.chkCreateOnSeparateThread = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -58,7 +60,7 @@
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(12, 659);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(500, 113);
+            this.listView1.Size = new System.Drawing.Size(500, 91);
             this.listView1.TabIndex = 7;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -203,11 +205,33 @@
             this.label2.TabIndex = 8;
             this.label2.Text = "Live:";
             // 
+            // chkRunOnSeparateThread
+            // 
+            this.chkRunOnSeparateThread.AutoSize = true;
+            this.chkRunOnSeparateThread.Location = new System.Drawing.Point(12, 755);
+            this.chkRunOnSeparateThread.Name = "chkRunOnSeparateThread";
+            this.chkRunOnSeparateThread.Size = new System.Drawing.Size(138, 17);
+            this.chkRunOnSeparateThread.TabIndex = 10;
+            this.chkRunOnSeparateThread.Text = "Run on separate thread";
+            this.chkRunOnSeparateThread.UseVisualStyleBackColor = true;
+            // 
+            // chkCreateOnSeparateThread
+            // 
+            this.chkCreateOnSeparateThread.AutoSize = true;
+            this.chkCreateOnSeparateThread.Location = new System.Drawing.Point(156, 755);
+            this.chkCreateOnSeparateThread.Name = "chkCreateOnSeparateThread";
+            this.chkCreateOnSeparateThread.Size = new System.Drawing.Size(152, 17);
+            this.chkCreateOnSeparateThread.TabIndex = 10;
+            this.chkCreateOnSeparateThread.Text = "Create on separate thread.";
+            this.chkCreateOnSeparateThread.UseVisualStyleBackColor = true;
+            // 
             // WebCamDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(524, 813);
+            this.Controls.Add(this.chkCreateOnSeparateThread);
+            this.Controls.Add(this.chkRunOnSeparateThread);
             this.Controls.Add(this.lblEnd);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -247,6 +271,8 @@
         private System.Windows.Forms.Button btnStop;
         private System.Windows.Forms.Label lblEnd;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox chkRunOnSeparateThread;
+        private System.Windows.Forms.CheckBox chkCreateOnSeparateThread;
     }
 }
 
