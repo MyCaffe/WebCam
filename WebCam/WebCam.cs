@@ -153,16 +153,20 @@ namespace WebCam
 
             // Create the sample grabber used to get snapshots.
             m_sampleGrabber = (ISampleGrabber)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.SampleGrabber, true));
-            m_mediaControl = m_graphBuilder as IMediaControl;
-            m_mediaEventEx = m_graphBuilder as IMediaEventEx;
             m_baseGrabFilter = m_sampleGrabber as IBaseFilter;
+            m_mediaControl = m_graphBuilder as IMediaControl;
 
             // When using a target window, get the video window used with the target output window
-            if (pb != null) 
+            if (pb != null)
+            {
+                m_mediaEventEx = m_graphBuilder as IMediaEventEx;
                 m_videoWindow = m_graphBuilder as IVideoWindow;
+            }
             // Otherwise create the null renderer for no video output is needed (only snapshots).
             else
+            {
                 m_nullRenderer = (IBaseFilter)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.NullRenderer, true));
+            }
 
             // Add the sample grabber to the filte graph.
             hr = m_graphBuilder.AddFilter(m_baseGrabFilter, "Ds.Lib Grabber");
@@ -410,7 +414,7 @@ namespace WebCam
             m_lDuration = 0;
 
             if (m_mediaControl != null)
-                m_mediaControl.StopWhenReady();
+                m_mediaControl.Stop();
 
             if (m_mediaEventEx != null)
                 m_mediaEventEx.SetNotifyWindow(IntPtr.Zero, WM_GRAPHNOTIFY, IntPtr.Zero);
@@ -421,17 +425,18 @@ namespace WebCam
                 m_videoWindow.put_Owner(IntPtr.Zero);
             }
 
-            m_mediaControl = null;
-            m_mediaEventEx = null;
-            m_videoWindow = null;
-            m_videoFrameStep = null;
-            m_baseGrabFilter = null;
-            m_camControl = null;
+            // Release all interfaces.
 
-            if (m_sampleGrabber != null)
+            if (m_graphBuilder != null)
             {
-                Marshal.ReleaseComObject(m_sampleGrabber);
-                m_sampleGrabber = null;
+                Marshal.ReleaseComObject(m_graphBuilder);
+                m_graphBuilder = null;
+            }
+
+            if (m_camControl != null)
+            {
+                Marshal.ReleaseComObject(m_camControl);
+                m_camControl = null;
             }
 
             if (m_captureGraphBuilder != null)
@@ -440,28 +445,58 @@ namespace WebCam
                 m_captureGraphBuilder = null;
             }
 
-            if (m_graphBuilder != null)
+            if (m_mediaSeek != null)
             {
-                Marshal.ReleaseComObject(m_graphBuilder);
-                m_graphBuilder = null;
+                Marshal.ReleaseComObject(m_mediaSeek);
+                m_mediaSeek = null;
             }
 
-            if (m_camFilter != null)
+            if (m_videoFrameStep != null)
             {
-                Marshal.ReleaseComObject(m_camFilter);
-                m_camFilter = null;
+                Marshal.ReleaseComObject(m_videoFrameStep);
+                m_videoFrameStep = null;
             }
 
-            if (m_videoFilter != null)
+            if (m_sampleGrabber != null)
             {
-                Marshal.ReleaseComObject(m_videoFilter);
-                m_videoFilter = null;
+                Marshal.ReleaseComObject(m_sampleGrabber);
+                m_sampleGrabber = null;
+            }
+
+            if (m_baseGrabFilter != null)
+            {
+                Marshal.ReleaseComObject(m_baseGrabFilter);
+                m_baseGrabFilter = null;
+            }
+
+            if (m_mediaControl != null)
+            {
+                Marshal.ReleaseComObject(m_mediaControl);
+                m_mediaControl = null;
+            }
+
+            if (m_mediaEventEx != null)
+            {
+                Marshal.ReleaseComObject(m_mediaEventEx);
+                m_mediaEventEx = null;
+            }
+
+            if (m_videoWindow != null)
+            {
+                Marshal.ReleaseComObject(m_videoWindow);
+                m_videoWindow = null;
             }
 
             if (m_nullRenderer != null)
             {
                 Marshal.ReleaseComObject(m_nullRenderer);
                 m_nullRenderer = null;
+            }
+
+            if (m_videoFilter != null)
+            {
+                Marshal.ReleaseComObject(m_videoFilter);
+                m_videoFilter = null;
             }
         }
 
