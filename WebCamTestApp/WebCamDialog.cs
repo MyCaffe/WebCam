@@ -26,6 +26,8 @@ namespace WebCamSample
         Task m_taskCmd = null;
         AutoResetEvent m_evtCreateDone = new AutoResetEvent(false);
         Task m_taskCreate = null;
+        string m_strDefaultFolder = null;
+        string m_strDefaultFile = null;
 
         delegate void fnHandleSnap(Bitmap bmp);
 
@@ -37,8 +39,11 @@ namespace WebCamSample
             STOP
         }
 
-        public WebCamDialog()
+        public WebCamDialog(string strDefaultFolder = null, string strDefaultFile = null)
         {
+            m_strDefaultFolder = strDefaultFolder;
+            m_strDefaultFile = strDefaultFile;
+
             InitializeComponent();
             m_webCam.OnSnapshot += m_webCam_OnSnapshot;
         }
@@ -75,6 +80,12 @@ namespace WebCamSample
 
             if (filter == null)
             {
+                if (!string.IsNullOrEmpty(m_strDefaultFolder))
+                    openFileDialog1.InitialDirectory = m_strDefaultFolder;
+
+                if (!string.IsNullOrEmpty(m_strDefaultFile))
+                    openFileDialog1.FileName = m_strDefaultFile;
+
                 if (openFileDialog1.ShowDialog() != DialogResult.OK)
                     return;
 
