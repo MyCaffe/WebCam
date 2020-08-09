@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -122,7 +123,7 @@ namespace WebCam
             // When using a web-cam, create the moniker for the filter and add the filter to the graph.
             if (strFile == null)
             {
-                UCOMIMoniker moniker = m_selectedFilter.CreateMoniker();
+                IMoniker moniker = m_selectedFilter.CreateMoniker();
                 m_graphBuilder.AddSourceFilterForMoniker(moniker, null, m_selectedFilter.Name, out m_camFilter);
                 Marshal.ReleaseComObject(moniker);
                 m_camControl = m_camFilter as IAMCameraControl;

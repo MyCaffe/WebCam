@@ -13,6 +13,7 @@
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using DShowNET;
 using DShowNET.Device;
 
@@ -38,8 +39,8 @@ namespace DirectX.Capture
 			int					hr;
 			object				comObj = null;
 			ICreateDevEnum		enumDev = null;
-			UCOMIEnumMoniker	enumMon = null;
-			UCOMIMoniker[]		mon = new UCOMIMoniker[1];
+			IEnumMoniker		enumMon = null;
+			IMoniker[]		mon = new IMoniker[1];
 
 			try 
 			{
@@ -56,11 +57,11 @@ namespace DirectX.Capture
 				{
 
 					// Loop through the enumerator
-					int f;
+					IntPtr f = new IntPtr();
 					do
 					{
 						// Next filter
-						hr = enumMon.Next( 1, mon, out f );
+						hr = enumMon.Next( 1, mon, f );
 						if( (hr != 0) || (mon[0] == null) )
 							break;
 						

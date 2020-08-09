@@ -8,6 +8,7 @@
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace DShowNET
 {
@@ -217,8 +218,8 @@ namespace DShowNET
 
         [PreserveSig]
         int AddSourceFilterForMoniker(
-            [In] UCOMIMoniker moniker,
-            [In] UCOMIBindCtx bindContext,
+            [In] IMoniker moniker,
+            [In] IBindCtx bindContext,
             [In, MarshalAs(UnmanagedType.LPWStr)] string filterName,
             [Out] out IBaseFilter filter);
 

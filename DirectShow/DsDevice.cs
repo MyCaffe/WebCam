@@ -9,6 +9,7 @@
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace DShowNET.Device
 {
@@ -23,8 +24,8 @@ namespace DShowNET.Device
 			int hr;
 			object comObj = null;
 			ICreateDevEnum enumDev = null;
-			UCOMIEnumMoniker enumMon = null;
-			UCOMIMoniker[] mon = new UCOMIMoniker[1];
+			IEnumMoniker enumMon = null;
+			IMoniker[] mon = new IMoniker[1];
 			try {
 				Type	srvType = Type.GetTypeFromCLSID( Clsid.SystemDeviceEnum );
 				if( srvType == null )
@@ -36,10 +37,11 @@ namespace DShowNET.Device
 				if( hr != 0 )
 					throw new NotSupportedException( "No devices of the category" );
 
-				int f, count = 0;
+				IntPtr f = new IntPtr();
+				int count = 0;
 				do
 				{
-					hr = enumMon.Next( 1, mon, out f );
+					hr = enumMon.Next( 1, mon, f );
 					if( (hr != 0) || (mon[0] == null) )
 						break;
 					DsDevice dev = new DsDevice();
@@ -77,7 +79,7 @@ namespace DShowNET.Device
 
 		}
 
-		private static string GetFriendlyName( UCOMIMoniker mon )
+		private static string GetFriendlyName( IMoniker mon )
 		{
 			object bagObj = null;
 			IPropertyBag bag = null;
@@ -112,8 +114,8 @@ namespace DShowNET.Device
 	public class DsDevice : IDisposable
 	{
 		public string			Name;
-		public UCOMIMoniker		Mon;
-		
+		public IMoniker			Mon;
+
 		public void Dispose()
 		{
 			if( Mon != null )
@@ -135,7 +137,7 @@ public interface ICreateDevEnum
 		[PreserveSig]
 	int CreateClassEnumerator(
 		[In]											ref Guid			pType,
-		[Out]										out UCOMIEnumMoniker	ppEnumMoniker,
+		[Out]											out IEnumMoniker    ppEnumMoniker,
 		[In]											int					dwFlags );
 }
 
