@@ -13,6 +13,7 @@
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using DShowNET;
 using DShowNET.Device;
 
@@ -52,16 +53,16 @@ namespace DirectX.Capture
 		}
 
 		/// <summary> Create a new filter from its moniker </summary>
-		internal Filter( UCOMIMoniker moniker )
+		internal Filter( IMoniker moniker )
 		{
 			Name = getName( moniker );
 			MonikerString = getMonikerString( moniker );
 		}
 
-        public UCOMIMoniker CreateMoniker()
+        public IMoniker CreateMoniker()
         {
-            UCOMIMoniker parser = null;
-            UCOMIMoniker moniker = null;
+            IMoniker parser = null;
+            IMoniker moniker = null;
 
             try
             {
@@ -79,7 +80,7 @@ namespace DirectX.Capture
         }
 
         /// <summary> Retrieve the a moniker's display name (i.e. it's unique string) </summary>
-        protected string getMonikerString(UCOMIMoniker moniker)
+        protected string getMonikerString(IMoniker moniker)
 		{
 			string s;
 			moniker.GetDisplayName( null, null, out s );
@@ -87,7 +88,7 @@ namespace DirectX.Capture
 		}
 
 		/// <summary> Retrieve the human-readable name of the filter </summary>
-		protected string getName(UCOMIMoniker moniker)
+		protected string getName(IMoniker moniker)
 		{
 			object bagObj = null;
 			IPropertyBag bag = null;
@@ -120,8 +121,8 @@ namespace DirectX.Capture
 		/// <summary> Get a moniker's human-readable name based on a moniker string. </summary>
 		protected string getName(string monikerString)
 		{
-			UCOMIMoniker parser = null; 
-			UCOMIMoniker moniker = null;
+			IMoniker parser = null;
+			IMoniker moniker = null;
 			try
 			{
 				parser = getAnyMoniker();
@@ -149,14 +150,14 @@ namespace DirectX.Capture
 		///  This assumes there is at least one video compressor filter
 		///  installed on the system.
 		/// </summary>
-		protected UCOMIMoniker getAnyMoniker()
+		protected IMoniker getAnyMoniker()
 		{
 			Guid				category = FilterCategory.VideoCompressorCategory;
 			int					hr;
 			object				comObj = null;
 			ICreateDevEnum		enumDev = null;
-			UCOMIEnumMoniker	enumMon = null;
-			UCOMIMoniker[]		mon = new UCOMIMoniker[1];
+			IEnumMoniker		enumMon = null;
+			IMoniker[]		mon = new IMoniker[1];
 
 			try 
 			{
@@ -173,8 +174,8 @@ namespace DirectX.Capture
 					throw new NotSupportedException( "No devices of the category" );
 
 				// Get first filter
-				int f;
-				hr = enumMon.Next( 1, mon, out f );
+				IntPtr f = new IntPtr();
+				hr = enumMon.Next( 1, mon, f );
 				if( (hr != 0) )
 					mon[0] = null;
 

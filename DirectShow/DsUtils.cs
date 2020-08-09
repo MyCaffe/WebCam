@@ -10,6 +10,7 @@ using System.IO;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace DShowNET
 {
@@ -222,12 +223,11 @@ public struct BitmapInfoHeader
 		[ComVisible(false)]
 	public class DsROT
 	{
-		public static bool AddGraphToRot( object graph, out int cookie )
+		public static bool AddGraphToRot( object graph )
 		{
-			cookie = 0;
 			int hr = 0;
-			UCOMIRunningObjectTable rot = null;
-			UCOMIMoniker mk = null;
+			IRunningObjectTable rot = null;
+			IMoniker mk = null;
 			try {
 				hr = GetRunningObjectTable( 0, out rot );
 				if( hr < 0 )
@@ -242,7 +242,7 @@ public struct BitmapInfoHeader
 				if( hr < 0 )
 					Marshal.ThrowExceptionForHR( hr );
 				
-				rot.Register( ROTFLAGS_REGISTRATIONKEEPSALIVE, graph, mk, out cookie );
+				rot.Register( ROTFLAGS_REGISTRATIONKEEPSALIVE, graph, mk );
 				return true;
 			}
 			catch( Exception )
@@ -260,7 +260,7 @@ public struct BitmapInfoHeader
 
 		public static bool RemoveGraphFromRot( ref int cookie )
 		{
-			UCOMIRunningObjectTable rot = null;
+			IRunningObjectTable rot = null;
 			try {
 				int hr = GetRunningObjectTable( 0, out rot );
 				if( hr < 0 )
@@ -285,11 +285,11 @@ public struct BitmapInfoHeader
 
 		[DllImport("ole32.dll", ExactSpelling=true) ]
 		private static extern int GetRunningObjectTable( int r,
-			out UCOMIRunningObjectTable pprot );
+			out IRunningObjectTable pprot );
 
 		[DllImport("ole32.dll", CharSet=CharSet.Unicode, ExactSpelling=true) ]
 		private static extern int CreateItemMoniker( string delim,
-			string item, out UCOMIMoniker ppmk );
+			string item, out IMoniker ppmk );
 
 		[DllImport("kernel32.dll", ExactSpelling=true) ]
 		private static extern int GetCurrentProcessId();
