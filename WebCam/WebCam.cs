@@ -44,6 +44,7 @@ namespace WebCam
         bool m_bRunning = false;
         bool m_bConnected = false;
         long m_lDuration = 0;
+        bool m_bAutoResize = true;
 
         const int WS_CHILD = 0x40000000;
         const int WS_CLIPCHILDREN = 0x02000000;
@@ -68,6 +69,15 @@ namespace WebCam
         public void Dispose()
         {
             Close();
+        }
+
+        /// <summary>
+        /// Get/set whether or not to subscribe to the target picturebox size changed event and automatically resize the video window.
+        /// </summary>
+        public bool AutoResize
+        {
+            get { return m_bAutoResize; }
+            set { m_bAutoResize = value; }
         }
 
         /// <summary>
@@ -377,6 +387,9 @@ namespace WebCam
                 hr = m_videoWindow.put_Visible(DsHlp.OATRUE);
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
+
+                // Subscribe to the picturebox size changed event.
+                pb.SizeChanged += Pb_SizeChanged;
             }
 
 
@@ -404,6 +417,34 @@ namespace WebCam
             m_bConnected = true;
 
             return m_lDuration;
+        }
+
+        /// <summary>
+        /// Event handler to resize video frame when the picturebox size changes (if required to do so).
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Pb_SizeChanged(object sender, EventArgs e)
+        {
+            if (m_videoWindow == null)
+                return;
+
+            if (m_bAutoResize)
+            {
+                int hr;
+
+                PictureBox pb = sender as PictureBox;
+                if (pb == null)
+                    return;
+
+                hr = m_videoWindow.put_Width(pb.Width);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                hr = m_videoWindow.put_Height(pb.Height);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+            }
         }
 
         /// <summary>
