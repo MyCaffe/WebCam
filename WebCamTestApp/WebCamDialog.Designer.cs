@@ -52,7 +52,8 @@
             // 
             // listView1
             // 
-            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colSource});
@@ -64,6 +65,7 @@
             this.listView1.TabIndex = 7;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
+            this.listView1.Resize += new System.EventHandler(this.listView1_Resize);
             // 
             // colSource
             // 
@@ -185,7 +187,7 @@
             // 
             // lblEnd
             // 
-            this.lblEnd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblEnd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblEnd.AutoSize = true;
             this.lblEnd.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblEnd.ForeColor = System.Drawing.Color.Red;
@@ -207,6 +209,7 @@
             // 
             // chkRunOnSeparateThread
             // 
+            this.chkRunOnSeparateThread.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkRunOnSeparateThread.AutoSize = true;
             this.chkRunOnSeparateThread.Location = new System.Drawing.Point(12, 755);
             this.chkRunOnSeparateThread.Name = "chkRunOnSeparateThread";
@@ -217,6 +220,7 @@
             // 
             // chkCreateOnSeparateThread
             // 
+            this.chkCreateOnSeparateThread.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkCreateOnSeparateThread.AutoSize = true;
             this.chkCreateOnSeparateThread.Location = new System.Drawing.Point(156, 755);
             this.chkCreateOnSeparateThread.Name = "chkCreateOnSeparateThread";

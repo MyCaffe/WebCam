@@ -270,5 +270,10 @@ namespace WebCamSample
                 }
             }
         }
+
+        private void listView1_Resize(object sender, EventArgs e)
+        {
+            listView1.Columns[0].Width = ClientRectangle.Width - 50;
+        }
     }
 }
