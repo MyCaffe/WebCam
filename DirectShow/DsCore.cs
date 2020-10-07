@@ -190,12 +190,15 @@ namespace DShowNET
 		[PreserveSig]
 		int GetClassID(
 			[Out]									out Guid		pClassID );
-	}
+
+        int Load([In, MarshalAs(UnmanagedType.Interface)] System.Runtime.InteropServices.ComTypes.IStream pStm);
+        int Save([In, MarshalAs(UnmanagedType.Interface)] System.Runtime.InteropServices.ComTypes.IStream pStm, [In, MarshalAs(UnmanagedType.Bool)] bool fClearDirty);
+    }
 
 
-// ---------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------
 
-	[ComVisible(true), ComImport,
+    [ComVisible(true), ComImport,
 	Guid("56a86899-0ad4-11ce-b03a-0020af0ba770"),
 	InterfaceType( ComInterfaceType.InterfaceIsIUnknown )]
 	public interface IMediaFilter
