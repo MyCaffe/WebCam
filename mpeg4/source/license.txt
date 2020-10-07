@@ -1,0 +1,1 @@
+Mp4demux and mp4mux projects are provided as 'public domain' by http://www.gdcl.co.uk/mpeg4/
