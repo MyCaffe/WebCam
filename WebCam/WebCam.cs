@@ -179,7 +179,7 @@ namespace WebCam
                 m_nullRenderer = (IBaseFilter)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.NullRenderer, true));
             }
 
-            // Add the sample grabber to the filte graph.
+            // Add the sample grabber to the filter graph.
             hr = m_graphBuilder.AddFilter(m_baseGrabFilter, "Ds.Lib Grabber");
             if (hr < 0)
                 Marshal.ThrowExceptionForHR(hr);
@@ -204,6 +204,7 @@ namespace WebCam
             media.majorType = MediaType.Video;
             media.subType = MediaSubType.RGB24;
             media.formatType = FormatType.VideoInfo;
+
             hr = m_sampleGrabber.SetMediaType(media);
             if (hr < 0)
                 Marshal.ThrowExceptionForHR(hr);
