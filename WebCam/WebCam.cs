@@ -119,8 +119,9 @@ namespace WebCam
         /// <param name="filter">Specifies the web-cam filter to use, or <i>null</i> when opening a video file.</param>
         /// <param name="pb">Specifies the output window, or <i>null</i> when running headless and only receiving snapshots.</param>
         /// <param name="strFile">Specifies the video file to use, or <i>null</i> when opening a web-cam feed.</param>
+        /// <param name="bSelectResolution">Specifies to open the select resolution dialog on connect.</param>
         /// <returns></returns>
-        public long Open(Filter filter, PictureBox pb, string strFile)
+        public long Open(Filter filter, PictureBox pb, string strFile, bool bSelectResolution = false)
         {
             int hr;
 
@@ -148,6 +149,10 @@ namespace WebCam
                 hr = m_graphBuilder.AddFilter(m_camFilter, m_selectedFilter.Name);
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
+
+                // Show the resolution selection dialog.
+                if (bSelectResolution)
+                    DsUtils.ShowCapPinDialog(m_captureGraphBuilder, m_camFilter, IntPtr.Zero);
             }
             else
             {

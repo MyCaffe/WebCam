@@ -46,14 +46,14 @@
             this.label2 = new System.Windows.Forms.Label();
             this.chkRunOnSeparateThread = new System.Windows.Forms.CheckBox();
             this.chkCreateOnSeparateThread = new System.Windows.Forms.CheckBox();
+            this.chkSelectResolution = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // listView1
             // 
-            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colSource});
@@ -108,7 +108,8 @@
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox1.Location = new System.Drawing.Point(12, 347);
@@ -229,11 +230,23 @@
             this.chkCreateOnSeparateThread.Text = "Create on separate thread.";
             this.chkCreateOnSeparateThread.UseVisualStyleBackColor = true;
             // 
+            // chkSelectResolution
+            // 
+            this.chkSelectResolution.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.chkSelectResolution.AutoSize = true;
+            this.chkSelectResolution.Location = new System.Drawing.Point(314, 755);
+            this.chkSelectResolution.Name = "chkSelectResolution";
+            this.chkSelectResolution.Size = new System.Drawing.Size(161, 17);
+            this.chkSelectResolution.TabIndex = 11;
+            this.chkSelectResolution.Text = "Select resolution on connect";
+            this.chkSelectResolution.UseVisualStyleBackColor = true;
+            // 
             // WebCamDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(524, 813);
+            this.Controls.Add(this.chkSelectResolution);
             this.Controls.Add(this.chkCreateOnSeparateThread);
             this.Controls.Add(this.chkRunOnSeparateThread);
             this.Controls.Add(this.lblEnd);
@@ -277,6 +290,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox chkRunOnSeparateThread;
         private System.Windows.Forms.CheckBox chkCreateOnSeparateThread;
+        private System.Windows.Forms.CheckBox chkSelectResolution;
     }
 }
 

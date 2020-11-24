@@ -110,7 +110,7 @@ namespace WebCamSample
                 m_taskCmd = Task.Factory.StartNew(new Action(testThread));
 
             if (!bCreated)
-                m_webCam.Open(filter, pictureBox1, strFile);
+                m_webCam.Open(filter, pictureBox1, strFile, chkSelectResolution.Checked);
         }
 
         private void timerUI_Tick(object sender, EventArgs e)
