@@ -28,8 +28,11 @@ namespace WebCamSample
         Task m_taskCreate = null;
         string m_strDefaultFolder = null;
         string m_strDefaultFile = null;
+        VideoCapability m_selectedVideoCaps = null;
 
         delegate void fnHandleSnap(Bitmap bmp);
+
+        public event EventHandler<GetVideoCapabilitiesArgs> OnGetVideoCapabilities;
 
         public enum COMMAND
         {
@@ -56,6 +59,9 @@ namespace WebCamSample
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            if (OnGetVideoCapabilities == null)
+                btnSetCapabilities.Visible = false;
+
             foreach (Filter filter in m_webCam.VideoInputDevices)
             {
                 ListViewItem lvi = new ListViewItem(filter.Name);
@@ -110,7 +116,7 @@ namespace WebCamSample
                 m_taskCmd = Task.Factory.StartNew(new Action(testThread));
 
             if (!bCreated)
-                m_webCam.Open(filter, pictureBox1, strFile, chkSelectResolution.Checked);
+                m_webCam.Open(filter, pictureBox1, strFile, m_selectedVideoCaps);
         }
 
         private void timerUI_Tick(object sender, EventArgs e)
@@ -274,6 +280,41 @@ namespace WebCamSample
         private void listView1_Resize(object sender, EventArgs e)
         {
             listView1.Columns[0].Width = ClientRectangle.Width - 50;
+        }
+
+        private void btnSetCapabilities_Click(object sender, EventArgs e)
+        {
+            if (OnGetVideoCapabilities != null)
+            {
+                Filter filter = listView1.SelectedItems[0].Tag as Filter;
+                VideoCapabilityCollection colCap = m_webCam.GetVideoCapatiblities(filter);
+                GetVideoCapabilitiesArgs args = new GetVideoCapabilitiesArgs(colCap);
+
+                OnGetVideoCapabilities(this, args);
+                m_selectedVideoCaps = args.SelectedVideoCapability;
+            }
+        }
+    }
+
+    public class GetVideoCapabilitiesArgs : EventArgs
+    {
+        VideoCapabilityCollection m_colCap;
+        VideoCapability m_cap = null;
+
+        public GetVideoCapabilitiesArgs(VideoCapabilityCollection colCap)
+        {
+            m_colCap = colCap;
+        }
+
+        public VideoCapabilityCollection VideoCapabilities
+        {
+            get { return m_colCap; }
+        }
+
+        public VideoCapability SelectedVideoCapability
+        {
+            get { return m_cap; }
+            set { m_cap = value; }
         }
     }
 }

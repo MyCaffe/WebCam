@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WebCamDialog));
             this.listView1 = new System.Windows.Forms.ListView();
             this.colSource = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnSnap = new System.Windows.Forms.Button();
@@ -46,7 +47,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.chkRunOnSeparateThread = new System.Windows.Forms.CheckBox();
             this.chkCreateOnSeparateThread = new System.Windows.Forms.CheckBox();
-            this.chkSelectResolution = new System.Windows.Forms.CheckBox();
+            this.btnSetCapabilities = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -230,23 +231,23 @@
             this.chkCreateOnSeparateThread.Text = "Create on separate thread.";
             this.chkCreateOnSeparateThread.UseVisualStyleBackColor = true;
             // 
-            // chkSelectResolution
+            // btnSetCapabilities
             // 
-            this.chkSelectResolution.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.chkSelectResolution.AutoSize = true;
-            this.chkSelectResolution.Location = new System.Drawing.Point(314, 755);
-            this.chkSelectResolution.Name = "chkSelectResolution";
-            this.chkSelectResolution.Size = new System.Drawing.Size(161, 17);
-            this.chkSelectResolution.TabIndex = 11;
-            this.chkSelectResolution.Text = "Select resolution on connect";
-            this.chkSelectResolution.UseVisualStyleBackColor = true;
+            this.btnSetCapabilities.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSetCapabilities.Image = ((System.Drawing.Image)(resources.GetObject("btnSetCapabilities.Image")));
+            this.btnSetCapabilities.Location = new System.Drawing.Point(492, 755);
+            this.btnSetCapabilities.Name = "btnSetCapabilities";
+            this.btnSetCapabilities.Size = new System.Drawing.Size(20, 17);
+            this.btnSetCapabilities.TabIndex = 11;
+            this.btnSetCapabilities.UseVisualStyleBackColor = true;
+            this.btnSetCapabilities.Click += new System.EventHandler(this.btnSetCapabilities_Click);
             // 
             // WebCamDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(524, 813);
-            this.Controls.Add(this.chkSelectResolution);
+            this.Controls.Add(this.btnSetCapabilities);
             this.Controls.Add(this.chkCreateOnSeparateThread);
             this.Controls.Add(this.chkRunOnSeparateThread);
             this.Controls.Add(this.lblEnd);
@@ -290,7 +291,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox chkRunOnSeparateThread;
         private System.Windows.Forms.CheckBox chkCreateOnSeparateThread;
-        private System.Windows.Forms.CheckBox chkSelectResolution;
+        private System.Windows.Forms.Button btnSetCapabilities;
     }
 }
 

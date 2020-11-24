@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -114,14 +115,136 @@ namespace WebCam
         }
 
         /// <summary>
+        /// Returns the video capabilities of the video device.
+        /// </summary>
+        /// <param name="filter">Specifies the video device.</param>
+        /// <returns>A collection of video capabilities is returned for the device.</returns>
+        public VideoCapabilityCollection GetVideoCapatiblities(Filter filter)
+        {
+            int hr;
+            IFilterGraph2 grph = null;
+            IBaseFilter camFltr = null;
+            ICaptureGraphBuilder2 bldr = null;
+            object comObj = null;
+            AMMediaType mt = null;
+            IntPtr pSC = IntPtr.Zero;
+            VideoCapabilityCollection colCap = new VideoCapabilityCollection();
+
+            try
+            {
+                if (filter == null)
+                    return colCap;
+
+                grph = (IFilterGraph2)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.FilterGraph, true));
+
+                IMoniker moniker = filter.CreateMoniker();
+                grph.AddSourceFilterForMoniker(moniker, null, filter.Name, out camFltr);
+                Marshal.ReleaseComObject(moniker);
+
+                bldr = (ICaptureGraphBuilder2)Activator.CreateInstance(Type.GetTypeFromCLSID(Clsid.CaptureGraphBuilder2, true));
+                hr = bldr.SetFiltergraph(grph as IGraphBuilder);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                // Add the web-cam filter to the graph.
+                hr = grph.AddFilter(camFltr, filter.Name);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                // Get the IAMStreamConfig interface.
+                Guid cat = PinCategory.Capture;
+                Guid type = MediaType.Interleaved;
+                Guid iid = typeof(IAMStreamConfig).GUID;
+
+                hr = bldr.FindInterface(ref cat, ref type, camFltr, ref iid, out comObj);
+                if (hr < 0)
+                {
+                    type = MediaType.Video;
+                    hr = bldr.FindInterface(ref cat, ref type, camFltr, ref iid, out comObj);
+                }
+
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                IAMStreamConfig cfg = comObj as IAMStreamConfig;
+
+
+                // Enumerate the video capabilities.
+                int nCount;
+                int nSize;
+                hr = cfg.GetNumberOfCapabilities(out nCount, out nSize);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                VideoInfoHeader vih = new VideoInfoHeader();
+                VideoStreamConfigCaps vsc = new VideoStreamConfigCaps();
+                pSC = Marshal.AllocCoTaskMem(nSize);
+
+                for (int i = 0; i < nCount; i++)
+                {
+                    IntPtr pMT;
+                    hr = cfg.GetStreamCaps(i, out pMT, pSC);
+                    if (hr < 0)
+                        Marshal.ThrowExceptionForHR(hr);
+
+                    mt = Marshal.PtrToStructure<AMMediaType>(pMT);
+
+                    Marshal.PtrToStructure(mt.formatPtr, vih);
+                    Marshal.PtrToStructure(pSC, vsc);
+
+                    int nWidth = vih.BmiHeader.Width;
+                    int nHeight = vih.BmiHeader.Height;
+                    int nFpsMin = (int)(10000000 / vsc.MaxFrameInterval);
+                    int nFpsMax = (int)(10000000 / vsc.MinFrameInterval);
+
+                    colCap.Add(new VideoCapability(nWidth, nHeight, nFpsMin, nFpsMax));
+
+                    if (mt != null)
+                    {
+                        Marshal.FreeCoTaskMem(mt.formatPtr);
+                        mt = null;
+                    }
+                }
+            }
+            catch (Exception excpt)
+            {
+                throw excpt;
+            }
+            finally
+            {
+                if (mt != null)
+                    Marshal.FreeCoTaskMem(mt.formatPtr);
+
+                if (comObj != null)
+                    Marshal.ReleaseComObject(comObj);
+
+                if (pSC != IntPtr.Zero)
+                    Marshal.FreeCoTaskMem(pSC);
+
+                if (bldr != null)
+                    Marshal.ReleaseComObject(bldr);
+
+                if (camFltr != null)
+                    Marshal.ReleaseComObject(camFltr);
+
+                if (grph != null)
+                    Marshal.ReleaseComObject(grph);
+            }
+
+            return colCap;
+        }
+
+
+        /// <summary>
         /// Open a new video feed (either web-cam or video file).
         /// </summary>
         /// <param name="filter">Specifies the web-cam filter to use, or <i>null</i> when opening a video file.</param>
         /// <param name="pb">Specifies the output window, or <i>null</i> when running headless and only receiving snapshots.</param>
         /// <param name="strFile">Specifies the video file to use, or <i>null</i> when opening a web-cam feed.</param>
-        /// <param name="bSelectResolution">Specifies to open the select resolution dialog on connect.</param>
-        /// <returns></returns>
-        public long Open(Filter filter, PictureBox pb, string strFile, bool bSelectResolution = false)
+        /// <param name="vidCap">Optionally specifies the video capabilities to use, or <i>null</i> to ignore and use the default video capabilities.</param>
+        /// <returns>The duration (if any) is returned, or 0.</returns>
+        /// <remarks>To get the video capabilities see the GetVideoCapatiblities method.</remarks>
+        public long Open(Filter filter, PictureBox pb, string strFile, VideoCapability vidCap = null)
         {
             int hr;
 
@@ -150,9 +273,9 @@ namespace WebCam
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
 
-                // Show the resolution selection dialog.
-                if (bSelectResolution)
-                    DsUtils.ShowCapPinDialog(m_captureGraphBuilder, m_camFilter, IntPtr.Zero);
+                // Set the desired video capabilities.
+                if (vidCap != null)
+                    setVideoCapabilities(m_captureGraphBuilder, m_camFilter, vidCap);
             }
             else
             {
@@ -423,6 +546,102 @@ namespace WebCam
             m_bConnected = true;
 
             return m_lDuration;
+        }
+
+        /// <summary>
+        /// Set the video capabilities.
+        /// </summary>
+        /// <param name="bldr">Specifies the capture builder</param>
+        /// <param name="flt">Specifies the video filter.</param>
+        /// <param name="vidCap">Specifies the desired capabilities.</param>
+        /// <returns><i>true</i> is returned if set, otherwise <i>false</i>.</returns>
+        /// <remarks>
+        /// @see http://blog.dvdbuilder.com/setting-video-capture-format-directshow-net
+        /// </remarks>
+        private bool setVideoCapabilities(ICaptureGraphBuilder2 bldr, IBaseFilter flt, VideoCapability vidCap)
+        {
+            int hr;
+            Guid cat = PinCategory.Capture;
+            Guid type = MediaType.Interleaved;
+            Guid iid = typeof(IAMStreamConfig).GUID;
+            object comObj = null;
+            IntPtr pSC = IntPtr.Zero;
+            AMMediaType mt = null;
+
+            try
+            {
+                hr = bldr.FindInterface(ref cat, ref type, flt, ref iid, out comObj);
+                if (hr != 0)
+                {
+                    type = MediaType.Video;
+                    hr = bldr.FindInterface(ref cat, ref type, flt, ref iid, out comObj);
+                }
+
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                IAMStreamConfig cfg = comObj as IAMStreamConfig;
+                int nCount;
+                int nSize;
+                hr = cfg.GetNumberOfCapabilities(out nCount, out nSize);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                VideoInfoHeader vih = new VideoInfoHeader();
+                VideoStreamConfigCaps vsc = new VideoStreamConfigCaps();
+                pSC = Marshal.AllocCoTaskMem(nSize);
+
+                for (int i = 0; i < nCount; i++)
+                {
+                    mt = null;
+
+                    IntPtr pMT;
+                    hr = cfg.GetStreamCaps(i, out pMT, pSC);
+                    if (hr == 0)
+                    {
+                        mt = Marshal.PtrToStructure<AMMediaType>(pMT);
+
+                        Marshal.PtrToStructure(mt.formatPtr, vih);
+                        Marshal.PtrToStructure(pSC, vsc);
+
+                        int nMinFps = (int)(10000000 / vsc.MaxFrameInterval);
+                        int nMaxFps = (int)(10000000 / vsc.MinFrameInterval);
+
+                        if ((vih.BmiHeader.Width == vidCap.Width || vidCap.Width == 0) &&
+                            (vih.BmiHeader.Height == vidCap.Height || vidCap.Height == 0) &&
+                            ((nMinFps <= vidCap.TargetFPS && nMaxFps >= vidCap.TargetFPS) || vidCap.TargetFPS == 0))
+                            break;
+                    }
+
+                    if (mt != null)
+                    {
+                        Marshal.FreeCoTaskMem(mt.formatPtr);
+                        mt = null;
+                    }
+                }
+
+                if (mt == null)
+                    return false;
+
+                cfg.SetFormat(mt);
+            }
+            catch (Exception excpt)
+            {
+                return false;
+            }
+            finally
+            {
+                if (comObj != null)
+                    Marshal.ReleaseComObject(comObj);
+
+                if (pSC != IntPtr.Zero)
+                    Marshal.FreeCoTaskMem(pSC);
+
+                if (mt != null)
+                    Marshal.FreeCoTaskMem(mt.formatPtr);
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -867,5 +1086,4 @@ namespace WebCam
             get { return m_bmp; }
         }
     }
-
 }

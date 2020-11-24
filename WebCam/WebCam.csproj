@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Utility.cs" />
+    <Compile Include="VideoCapability.cs" />
     <Compile Include="WebCam.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
