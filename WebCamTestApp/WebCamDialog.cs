@@ -60,7 +60,14 @@ namespace WebCamSample
         private void Form1_Load(object sender, EventArgs e)
         {
             if (OnGetVideoCapabilities == null)
+            {
                 btnSetCapabilities.Visible = false;
+            }
+            else
+            {
+                System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WebCamDialog));
+                this.btnSetCapabilities.Image = ((System.Drawing.Image)(resources.GetObject("btnSetCapabilities.Image")));
+            }
 
             foreach (Filter filter in m_webCam.VideoInputDevices)
             {

@@ -234,7 +234,6 @@
             // btnSetCapabilities
             // 
             this.btnSetCapabilities.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSetCapabilities.Image = ((System.Drawing.Image)(resources.GetObject("btnSetCapabilities.Image")));
             this.btnSetCapabilities.Location = new System.Drawing.Point(492, 755);
             this.btnSetCapabilities.Name = "btnSetCapabilities";
             this.btnSetCapabilities.Size = new System.Drawing.Size(20, 17);
