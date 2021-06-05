@@ -952,7 +952,8 @@ namespace WebCam
         /// <summary>
         /// Get a snapshot of the video or webcam.
         /// </summary>
-        public void GetImage()
+        /// <param name="nMsMaxWait">Optionally, specifies the maximum amount of milliseconds to wait to get the next image.</param>
+        public void GetImage(int nMsMaxWait = 60000)
         {
             int nSize = m_videoInfoHeader.BmiHeader.ImageSize;
             if (m_rgBuffer == null || m_rgBuffer.Length != nSize + 63999)
@@ -961,9 +962,16 @@ namespace WebCam
             m_bSnapEnabled = true;
             Step(1);
 
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+
             while (!m_evtImageSnapped.WaitOne(100))
             {
                 Application.DoEvents();
+
+                if (sw.Elapsed.TotalMilliseconds > nMsMaxWait)
+                    break;
             }
 
             return;
