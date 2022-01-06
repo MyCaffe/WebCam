@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebCamTestApp</RootNamespace>
     <AssemblyName>WebCamTestApp</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -107,10 +107,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>%25systemroot%25\System32\xcopy /y $(ProjectDir)WebCamDialog.cs $(SolutionDir)_nuget\build\content
-%25systemroot%25\System32\xcopy /y $(ProjectDir)WebCamDialog.Designer.cs $(SolutionDir)_nuget\build\content
-%25systemroot%25\System32\xcopy /y $(ProjectDir)WebCamDialog.resx $(SolutionDir)_nuget\build\content
-</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

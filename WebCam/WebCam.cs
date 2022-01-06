@@ -625,7 +625,7 @@ namespace WebCam
 
                 cfg.SetFormat(mt);
             }
-            catch (Exception excpt)
+            catch (Exception)
             {
                 return false;
             }

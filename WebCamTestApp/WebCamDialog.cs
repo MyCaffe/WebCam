@@ -18,7 +18,6 @@ namespace WebCamSample
         WebCam.WebCam m_webCam = new WebCam.WebCam();
         Bitmap m_bmp = null;
         AutoResetEvent m_evtBmpReady = new AutoResetEvent(false);
-        long m_lDuration = 0;
         COMMAND m_cmd;
         ManualResetEvent m_evtCancel = new ManualResetEvent(false);
         AutoResetEvent m_evtCmdReady = new AutoResetEvent(false);
