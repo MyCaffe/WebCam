@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("SignalPop LLC")]
 [assembly: AssemblyProduct("WebCam")]
-[assembly: AssemblyCopyright("Copyright © 2017-2021 SignalPop LLC. All rights reserved. (used under DirectXCapture public domain license)")]
+[assembly: AssemblyCopyright("Copyright © 2017-2022 SignalPop LLC. All rights reserved. (used under DirectXCapture public domain license)")]
 [assembly: AssemblyTrademark("SignalPop")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.11.5.36")]
-[assembly: AssemblyFileVersion("0.11.5.36")]
+[assembly: AssemblyVersion("0.11.6.86")]
+[assembly: AssemblyFileVersion("0.11.6.86")]
